@@ -3,7 +3,7 @@ from typing import List, Tuple, Optional
 
 
 GRAVITY = 9.81  # mm/s^2
-
+Reward = float
 
 @dataclass
 class Position:
@@ -73,6 +73,8 @@ class Observation:
     last_action: Action
     observed_pos: Position
     real_pos: Optional[Position]
+    reward: Reward
+    done: bool
 
 
 @dataclass
@@ -94,4 +96,4 @@ class VirtualEnvironmentNoiseConfig:
     position: float  # meters
 
 
-Episode = List[Tuple[EnvironmentState, Observation]]
+Episode = List[Observation]

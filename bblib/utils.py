@@ -51,7 +51,7 @@ def random_virtual_ball(config: EnvironmentConfig) -> VirtualBall:
     return VirtualBall(Position(ball_x, ball_y), Speed(speed_x, speed_y))
 
 
-def draw_state(config: EnvironmentConfig, state: EnvironmentState, observation: Observation,
+def draw_state(config: EnvironmentConfig, observation: Observation,
                virtual_config: Optional[VirtualEnvironmentConfig]) -> Image.Image:
     height = 200
     width = round(height * (config.limits.max_y/config.limits.max_x))
@@ -74,9 +74,8 @@ def draw_state(config: EnvironmentConfig, state: EnvironmentState, observation: 
     y = (observation.estimated_pos.y + config.limits.max_y) / (2.0 * config.limits.max_y)
     draw_spot(x, y, (255, 255, 255))
 
-    angle = compute_angle(config, state)
-    x = 0.5 + math.sin(angle.x) / angle_scale
-    y = 0.5 + math.sin(angle.y) / angle_scale
+    x = 0.5 + math.sin(observation.angle.x) / angle_scale
+    y = 0.5 + math.sin(observation.angle.y) / angle_scale
     draw_spot(x, y, (255, 0, 255))
 
     sx = (observation.estimated_pos.x + observation.estimated_speed.x + config.limits.max_x) / (2.0*config.limits.max_x)

@@ -1,12 +1,12 @@
 import math
 from abc import ABC, abstractmethod
-from typing import Optional, Tuple
+from typing import Optional
 
 import numpy as np
 from filterpy.kalman import KalmanFilter
 
 from bblib.defs import EnvironmentConfig, Position, Rotation, Angle, EnvironmentState, VirtualBall, Speed, \
-    Observation, VirtualEnvironmentConfig, VirtualEnvironmentNoiseConfig, Action
+    Observation, VirtualEnvironmentConfig, VirtualEnvironmentNoiseConfig, Action, Reward
 from bblib.utils import compute_angle
 
 
@@ -14,11 +14,11 @@ class Environment(ABC):
     def __init__(self, config: EnvironmentConfig, init_env_state: EnvironmentState):
         self.config = config
         self.state = init_env_state
-        self.last_rotation = Action(0, 0)
+        self.last_action = Action(0, 0)
         self.kalman: Optional[KalmanFilter] = None
 
     @abstractmethod
-    def update(self, action: Action) -> Tuple[Observation, float, bool]:
+    def update(self, action: Action) -> Observation:
         raise NotImplementedError
 
     def init_kalman(self, pos: Position):
@@ -53,22 +53,44 @@ class Environment(ABC):
 
         self.kalman = f
 
+    def compute_reward(self, observed_pos: Position) -> Reward:
+        reward = 0.0
+
+        dx = observed_pos.x / self.config.limits.max_x
+        dy = observed_pos.y / self.config.limits.max_y
+        distance = math.sqrt(dx ** 2 + dy ** 2)
+        reward += math.sqrt(2.0) - distance
+
+        # if observation.leaved:
+        # if abs(observation.observed_pos.x) > 0.8*config.limits.max_x
+        # or abs(observation.observed_pos.y) > 0.8*config.limits.max_y:
+        #     reward -= 10.0
+        #
+        # rot_diff_dist = ((previous_observation.last_action.x - observation.last_action.x) ** 2 +
+        #                  (previous_observation.last_action.y - observation.last_action.y) ** 2)
+        # reward -= rot_diff_dist / 10.0
+        #
+        # rot_dist = abs(observation.last_action.x) + abs(observation.last_action.y)
+        # reward -= rot_dist / 10.0
+
+        return reward
+
     def observe(self) -> Observation:
-        observed_ball_pos = self.observe_position()
+        observed_pos = self.observe_position()
 
         if not self.kalman:
-            self.init_kalman(observed_ball_pos)
+            self.init_kalman(observed_pos)
         else:
             self.kalman.predict()
-            self.kalman.update([observed_ball_pos.x, observed_ball_pos.y])
+            self.kalman.update([observed_pos.x, observed_pos.y])
 
-        ball_pos = Position(float(self.kalman.x[0]), float(self.kalman.x[1]))
-        ball_speed = Speed(float(self.kalman.x[2]), float(self.kalman.x[3]))
+        estimated_pos = Position(float(self.kalman.x[0]), float(self.kalman.x[1]))
+        estimated_speed = Speed(float(self.kalman.x[2]), float(self.kalman.x[3]))
 
         angle = self.observe_angle()
 
-        return Observation(ball_pos, ball_speed, angle, self.last_rotation, observed_ball_pos,
-                           self.real_position())
+        return Observation(estimated_pos, estimated_speed, angle, self.last_action, observed_pos,
+                           self.get_real_position(), self.compute_reward(observed_pos), False)
 
     @abstractmethod
     def observe_position(self) -> Position:
@@ -78,7 +100,7 @@ class Environment(ABC):
     def observe_angle(self) -> Angle:
         raise NotImplementedError
 
-    def real_position(self) -> Optional[Position]:
+    def get_real_position(self) -> Optional[Position]:
         return None
 
     def get_state(self) -> EnvironmentState:
@@ -108,16 +130,16 @@ class VirtualEnvironment(Environment):
     def observe_angle(self) -> Angle:
         return compute_angle(self.config, self.state)
 
-    def real_position(self) -> Optional[Position]:
+    def get_real_position(self) -> Optional[Position]:
         return self.ball.pos
 
-    def update(self, action: Action) -> Tuple[Observation, float, bool]:
+    def update(self, action: Action) -> Observation:
         self.state.rot.x = max(-self.config.max_rotation.x,
                                min(self.config.max_rotation.x, self.state.rot.x + action.x))
         self.state.rot.y = max(-self.config.max_rotation.y,
                                min(self.config.max_rotation.y, self.state.rot.y + action.y))
 
-        self.last_rotation = action
+        self.last_action = action
 
         angle = compute_angle(self.config, self.state)
         noisy_angle_x = angle.x * self.virtual_config.angle_scale.x + self.virtual_config.angle_offset.x
@@ -147,30 +169,9 @@ class VirtualEnvironment(Environment):
             self.ball.pos.y = -self.config.limits.max_y
             self.ball.speed.y *= -0.5
 
-        observation = self.observe()
-        return observation, self.compute_reward(observation), False
+        return self.observe()
 
-    def compute_reward(self, observation: Observation):
-        reward = 0.0
 
-        dx = observation.observed_pos.x / self.config.limits.max_x
-        dy = observation.observed_pos.y / self.config.limits.max_y
-        distance = math.sqrt(dx ** 2 + dy ** 2)
-        reward += math.sqrt(2.0) - distance
-
-        # if observation.leaved:
-        # if abs(observation.observed_pos.x) > 0.8*config.limits.max_x
-        # or abs(observation.observed_pos.y) > 0.8*config.limits.max_y:
-        #     reward -= 10.0
-        #
-        # rot_diff_dist = ((previous_observation.last_action.x - observation.last_action.x) ** 2 +
-        #                  (previous_observation.last_action.y - observation.last_action.y) ** 2)
-        # reward -= rot_diff_dist / 10.0
-        #
-        # rot_dist = abs(observation.last_action.x) + abs(observation.last_action.y)
-        # reward -= rot_dist / 10.0
-
-        return reward
 
 
 class RealEnvironment(Environment):

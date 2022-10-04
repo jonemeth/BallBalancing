@@ -1,8 +1,9 @@
-from copy import deepcopy
 from typing import List, Tuple
 
-from bblib.Agent import Agent, DQN, Experience
-from bblib.defs import EnvironmentConfig, Limits, Position, Rotation, Angle, Episode, VirtualEnvironmentConfigRandomness, \
+from bblib.agents.Agent import Agent
+from bblib.agents.DQN import DQN, Experience
+from bblib.defs import EnvironmentConfig, Limits, Position, Rotation, Angle, Episode, \
+    VirtualEnvironmentConfigRandomness, \
     VirtualEnvironmentNoiseConfig
 from bblib.environment import Environment, VirtualEnvironment
 from bblib.utils import random_environment_state, random_virtual_ball, draw_state, random_virtual_environment_config
@@ -19,17 +20,17 @@ default_environment_config = EnvironmentConfig(
 
 def run_episode(env: Environment, agent: Agent, steps) -> Tuple[Episode, List[Experience]]:
     observation = env.observe()
-    episode = [(deepcopy(env.get_state()), observation)]
+    episode = [observation]
     experiences = []
 
     for i in range(steps):
         action = agent.get_action(observation)
-        next_observation, reward, done = env.update(action)
+        next_observation = env.update(action)
 
-        experiences.append(Experience(observation, action, next_observation, reward, done))
+        experiences.append(Experience(observation, action, next_observation))
 
         observation = next_observation
-        episode.append((deepcopy(env.get_state()), observation))
+        episode.append(observation)
 
     return episode, experiences
 
@@ -57,7 +58,7 @@ def main():
 
         agent.epsilon = start_eps - (start_eps-end_eps) * min(1.0, i / eps_episodes)
         episode, experiences = run_episode(env, agent, episode_steps)
-        avg_reward = sum([exp.reward for exp in experiences]) / len(experiences)
+        avg_reward = sum([exp.observation.reward for exp in experiences]) / len(experiences)
         print(i, avg_reward, agent.epsilon)
         agent.add_experiences(experiences)
 
@@ -74,8 +75,8 @@ def main():
             episode, experiences = run_episode(env, agent, episode_steps)
 
             frames = []
-            for state, observation in episode:
-                frames.append(draw_state(env_config, state, observation, virtual_config))
+            for observation in episode:
+                frames.append(draw_state(env_config, observation, virtual_config))
 
             frames[0].save(f"out{i + 1:06d}.gif", format='GIF', append_images=frames[1:],
                            save_all=True, duration=env_config.d_t * 1000, loop=0)

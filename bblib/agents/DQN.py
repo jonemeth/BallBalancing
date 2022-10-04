@@ -1,12 +1,12 @@
 import random
-from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import List, Callable
+from typing import List
 
 import torch
-from torch import nn
 from torch.utils.data import Dataset, DataLoader
 
+from bblib.agents.Agent import Agent
+from bblib.agents.nn import DefaultNetwork
 from bblib.defs import Observation, EnvironmentConfig, Action
 
 
@@ -15,27 +15,9 @@ class Experience:
     observation: Observation
     action: Action
     next_observation: Observation
-    reward: float
-    done: bool
 
 
 ExperienceList = List[Experience]
-
-
-class Agent(ABC):
-    def __init__(self, action_counts: List[int]):
-        self.action_counts = action_counts
-
-    def get_action_counts(self) -> List[int]:
-        return self.action_counts
-
-    @abstractmethod
-    def add_experiences(self, experiences: ExperienceList):
-        pass
-
-    @abstractmethod
-    def get_action(self, observation: Observation) -> Action:
-        pass
 
 
 class ExperienceDataset(Dataset):
@@ -54,28 +36,6 @@ class ExperienceDataset(Dataset):
 
     def __getitem__(self, idx):
         return self.experiences[idx]
-
-
-class DefaultNetwork(nn.Module):
-    def __init__(self, in_dim: int, hidden_layer_sizes: List[int], out_dims: List[int], activation_fn: Callable):
-        super().__init__()
-
-        fcs = []
-        for i, n in enumerate(hidden_layer_sizes):
-            fcs.append(nn.Linear(in_dim if i == 0 else hidden_layer_sizes[i - 1], n))
-            fcs.append(activation_fn())
-        self.fcs = nn.Sequential(*fcs)
-
-        fc_outs = []
-        for d in out_dims:
-            fc_outs.append(nn.Linear(hidden_layer_sizes[-1], d))
-        self.fc_outs = nn.ModuleList(fc_outs)
-
-    def forward(self, x: torch.Tensor):
-        assert 2 == len(x.shape)
-        x = self.fcs(x)
-
-        return [out(x) for out in self.fc_outs]
 
 
 class DQN(Agent):
@@ -101,8 +61,8 @@ class DQN(Agent):
             (self.transform_observation(exp.observation),
              self.transform_action(exp.action),
              self.transform_observation(exp.next_observation),
-             torch.tensor(exp.reward),
-             torch.tensor(exp.done).float())
+             torch.tensor(exp.observation.reward),
+             torch.tensor(exp.observation.done).float())
             for exp in experiences])
 
     def transform_observation(self, observation: Observation):
@@ -145,7 +105,7 @@ class DQN(Agent):
             ]
         elif 1 == len(self.action_counts):
             assert 9 == self.action_counts[0]
-            actions = [3*(1+action.x) + (1+action.y)]
+            actions = [3 * (1 + action.x) + (1 + action.y)]
         else:
             raise NotImplementedError
 
@@ -155,31 +115,6 @@ class DQN(Agent):
 
     def train(self, num_iters: int):
         self.network.train()
-
-        # num_iters = min(num_iters, len(self.experience_dataset.experiences)//self.batch_size)
-        # for ix in range(num_iters):
-        #     self.solver.zero_grad()
-        #
-        #     experience_batch = random.sample(self.experience_dataset.experiences, self.batch_size)
-        #
-        #     observations = torch.stack([exp[0] for exp in experience_batch])
-        #     next_observations = torch.stack([exp[2] for exp in experience_batch])
-        #
-        #     rewards = torch.stack([exp[3] for exp in experience_batch])
-        #     dones = torch.stack([exp[4] for exp in experience_batch])
-        #     actions = [torch.stack([exp[1][i] for exp in experience_batch])
-        #                for i in range(len(self.action_counts))]
-        #
-        #     max_next_qs = [q.detach().max(dim=1)[0] for q in self.network(next_observations)]
-        #     target_qs = [(rewards + self.discount_factor * q * (1.0 - dones)) for q in max_next_qs]
-        #     qs = self.network(observations)
-        #     qs = [(q * a).sum(1) for q, a in zip(qs, actions)]
-        #
-        #     losses = [(q - target_q) ** 2 for q, target_q in zip(qs, target_qs)]
-        #     loss = torch.stack(losses).mean(0).mean(0)
-        #
-        #     loss.backward()
-        #     self.solver.step()
 
         train_dataloader = DataLoader(self.experience_dataset, batch_size=self.batch_size, shuffle=True)
 
