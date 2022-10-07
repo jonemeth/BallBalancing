@@ -11,17 +11,18 @@ class Agent(ABC):
     def get_action_counts(self) -> List[int]:
         return self.action_counts
 
-    # @abstractmethod
-    # def add_experiences(self, experiences: ExperienceList):
-    #     pass
+    @abstractmethod
+    def step(self, observation: Observation) -> Action:
+        pass
 
     @abstractmethod
-    def get_action(self, observation: Observation) -> Action:
+    def start(self):
         pass
-    # @abstractmethod
-    # def start(self) -> Action:
-    #     pass
-    #
-    # @abstractmethod
-    # def finish(self) -> Action:
-    #     pass
+
+    @abstractmethod
+    def finish(self):
+        pass
+
+    @abstractmethod
+    def train(self):
+        pass

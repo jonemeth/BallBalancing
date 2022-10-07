@@ -1,7 +1,5 @@
-from typing import List, Tuple
-
 from bblib.agents.Agent import Agent
-from bblib.agents.DQN import DQN, Experience
+from bblib.agents.DQN import DQN
 from bblib.defs import EnvironmentConfig, Limits, Position, Rotation, Angle, Episode, \
     VirtualEnvironmentConfigRandomness, \
     VirtualEnvironmentNoiseConfig
@@ -18,21 +16,18 @@ default_environment_config = EnvironmentConfig(
 )
 
 
-def run_episode(env: Environment, agent: Agent, steps) -> Tuple[Episode, List[Experience]]:
+def run_episode(env: Environment, agent: Agent, steps) -> Episode:
     observation = env.observe()
     episode = [observation]
-    experiences = []
 
+    agent.start()
     for i in range(steps):
-        action = agent.get_action(observation)
-        next_observation = env.update(action)
-
-        experiences.append(Experience(observation, action, next_observation))
-
-        observation = next_observation
+        action = agent.step(observation)
+        observation = env.update(action)
         episode.append(observation)
+    agent.finish()
 
-    return episode, experiences
+    return episode
 
 
 def main():
@@ -57,12 +52,11 @@ def main():
                                  virtual_env_noise_cfg)
 
         agent.epsilon = start_eps - (start_eps-end_eps) * min(1.0, i / eps_episodes)
-        episode, experiences = run_episode(env, agent, episode_steps)
-        avg_reward = sum([exp.observation.reward for exp in experiences]) / len(experiences)
+        episode = run_episode(env, agent, episode_steps)
+        avg_reward = sum([observation.reward for observation in episode]) / len(episode)
         print(i, avg_reward, agent.epsilon)
-        agent.add_experiences(experiences)
 
-        agent.train(64)
+        agent.train()
 
         if (i + 1) % 100 == 0:
             agent.epsilon = -1.0
@@ -72,7 +66,7 @@ def main():
                                      virtual_config,
                                      random_virtual_ball(env_config),
                                      virtual_env_noise_cfg)
-            episode, experiences = run_episode(env, agent, episode_steps)
+            episode = run_episode(env, agent, episode_steps)
 
             frames = []
             for observation in episode:

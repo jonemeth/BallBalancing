@@ -61,11 +61,10 @@ class Environment(ABC):
         distance = math.sqrt(dx ** 2 + dy ** 2)
         reward += math.sqrt(2.0) - distance
 
-        # if observation.leaved:
-        # if abs(observation.observed_pos.x) > 0.8*config.limits.max_x
-        # or abs(observation.observed_pos.y) > 0.8*config.limits.max_y:
-        #     reward -= 10.0
-        #
+        if abs(observed_pos.x) > 0.8*self.config.limits.max_x or \
+                abs(observed_pos.y) > 0.8*self.config.limits.max_y:
+            reward -= 10.0
+
         # rot_diff_dist = ((previous_observation.last_action.x - observation.last_action.x) ** 2 +
         #                  (previous_observation.last_action.y - observation.last_action.y) ** 2)
         # reward -= rot_diff_dist / 10.0
