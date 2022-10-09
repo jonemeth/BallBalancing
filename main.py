@@ -1,10 +1,12 @@
 from bblib.agents.Agent import Agent
 from bblib.agents.DQN import DQN
 from bblib.defs import EnvironmentConfig, Limits, Position, Rotation, Angle, Episode, \
-    VirtualEnvironmentConfigRandomness, \
+    RandomVirtualEnvironmentConfig, \
     VirtualEnvironmentNoiseConfig
-from bblib.environment import Environment, VirtualEnvironment
+from bblib.environments.Environment import Environment
+from bblib.environments.VirtualEnvironment import VirtualEnvironment
 from bblib.utils import random_environment_state, random_virtual_ball, draw_state, random_virtual_environment_config
+from utils.config import load_config
 
 default_environment_config = EnvironmentConfig(
     0.05,
@@ -29,10 +31,13 @@ def run_episode(env: Environment, agent: Agent, steps) -> Episode:
 
     return episode
 
-
 def main():
+    config = load_config('test.yaml')
+    print(config)
+
+def main2():
     env_config = default_environment_config
-    virtual_env_random_params = VirtualEnvironmentConfigRandomness(3.0, 0.10, 0.33)
+    random_virtual_env_config = RandomVirtualEnvironmentConfig(3.0, 0.10, 0.33)
     virtual_env_noise_cfg = VirtualEnvironmentNoiseConfig(0.01)
 
     num_episodes = 400
@@ -47,7 +52,7 @@ def main():
     for i in range(num_episodes):
         env = VirtualEnvironment(env_config,
                                  random_environment_state(),
-                                 random_virtual_environment_config(env_config, virtual_env_random_params),
+                                 random_virtual_environment_config(env_config, random_virtual_env_config),
                                  random_virtual_ball(env_config),
                                  virtual_env_noise_cfg)
 
@@ -60,7 +65,7 @@ def main():
 
         if (i + 1) % 100 == 0:
             agent.epsilon = -1.0
-            virtual_config = random_virtual_environment_config(env_config, virtual_env_random_params)
+            virtual_config = random_virtual_environment_config(env_config, random_virtual_env_config)
             env = VirtualEnvironment(env_config,
                                      random_environment_state(),
                                      virtual_config,
@@ -79,4 +84,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    main2()

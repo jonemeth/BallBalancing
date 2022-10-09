@@ -78,8 +78,8 @@ class Observation:
 
 
 @dataclass
-class VirtualEnvironmentConfigRandomness:
-    gravity: float  # m/s^2
+class RandomVirtualEnvironmentConfig:
+    max_gravity_offset: float  # m/s^2
     max_angle_offset: float  # ratio of max_angle
     max_angle_scale: float  # max distance from 1.0
 

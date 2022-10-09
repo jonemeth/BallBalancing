@@ -4,9 +4,10 @@ from typing import Optional, Tuple
 
 import numpy as np
 from PIL import Image
+from filterpy.kalman import KalmanFilter
 
-from bblib.defs import EnvironmentConfig, EnvironmentState, Angle, Rotation, VirtualBall, Position, Speed, Observation, \
-    VirtualEnvironmentConfigRandomness, GRAVITY, VirtualEnvironmentConfig
+from bblib.defs import EnvironmentConfig, EnvironmentState, Angle, Rotation, VirtualBall, Position, Speed, \
+    Observation, RandomVirtualEnvironmentConfig, GRAVITY, VirtualEnvironmentConfig
 
 
 def compute_angle(config: EnvironmentConfig, state: EnvironmentState) -> Angle:
@@ -21,9 +22,9 @@ def random_environment_state() -> EnvironmentState:
     return EnvironmentState(rot)
 
 
-def random_virtual_environment_config(config: EnvironmentConfig, virtual_config: VirtualEnvironmentConfigRandomness)\
+def random_virtual_environment_config(config: EnvironmentConfig, virtual_config: RandomVirtualEnvironmentConfig)\
         -> VirtualEnvironmentConfig:
-    gravity = GRAVITY + random.uniform(-virtual_config.gravity, virtual_config.gravity)
+    gravity = GRAVITY + random.uniform(-virtual_config.max_gravity_offset, virtual_config.max_gravity_offset)
 
     angle_offset = Angle(random.uniform(-virtual_config.max_angle_offset, virtual_config.max_angle_offset)
                          * config.max_angle.x,
@@ -96,3 +97,33 @@ def draw_state(config: EnvironmentConfig, observation: Observation,
         draw_spot(x, y, (255, 255, 0))
 
     return Image.fromarray(img)
+
+
+def init_motion_kalman(pos: Position, d_t: float, magnitude_of_acceleration_noise=0.1):
+    f = KalmanFilter(dim_x=4, dim_z=2)
+    f.x = np.array([pos.x, pos.y, 0.0, 0.0])  # velocity
+
+    # Transition matrix
+    f.F = np.array([[1.0, 0.0, d_t, 0.0],
+                    [0.0, 1.0, 0.0, d_t],
+                    [0.0, 0.0, 1.0, 0.0],
+                    [0.0, 0.0, 0.0, 1.0]])
+
+    # Measurement matrix
+    f.H = np.array([[1.0, 0.0, 0.0, 0.0],
+                    [0.0, 1.0, 0.0, 0.0]])
+
+    # Process noise covariance
+    f.Q = np.array([[0.25 * d_t ** 4, 0, 0.5 * d_t ** 3, 0],
+                    [0, 0.25 * d_t ** 4, 0, 0.5 * d_t ** 3],
+                    [0.5 * d_t ** 3, 0, d_t ** 2, 0],
+                    [0, 0.5 * d_t ** 3, 0, d_t ** 2]]) * (magnitude_of_acceleration_noise**2)
+
+    # Measurement noise covariance
+    f.R = np.array([[0.01**2, 0.0],
+                    [0.0, 0.01**2]])
+
+    # Covariance
+    f.P = (0.1**2) * np.eye(4)
+
+    return f
