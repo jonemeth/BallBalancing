@@ -1,7 +1,5 @@
-import functools
 import sys
 from typing import Any, List, Type
-from operator import attrgetter
 
 import yaml
 

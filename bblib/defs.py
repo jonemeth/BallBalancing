@@ -1,9 +1,10 @@
 from dataclasses import dataclass
-from typing import List, Tuple, Optional
+from typing import List, Optional
 
 
 GRAVITY = 9.81  # mm/s^2
 Reward = float
+
 
 @dataclass
 class Position:

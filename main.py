@@ -31,11 +31,11 @@ def run_episode(env: Environment, agent: Agent, steps) -> Episode:
 
     return episode
 
+
 def main():
     config = load_config('test.yaml')
     print(config)
 
-def main2():
     env_config = default_environment_config
     random_virtual_env_config = RandomVirtualEnvironmentConfig(3.0, 0.10, 0.33)
     virtual_env_noise_cfg = VirtualEnvironmentNoiseConfig(0.01)
@@ -84,4 +84,4 @@ def main2():
 
 
 if __name__ == '__main__':
-    main2()
+    main()

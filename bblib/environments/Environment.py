@@ -1,13 +1,7 @@
 import math
 from abc import ABC, abstractmethod
-from typing import Optional
 
-import numpy as np
-from filterpy.kalman import KalmanFilter
-
-from bblib.defs import EnvironmentConfig, Position, Angle, EnvironmentState, VirtualBall, Speed, \
-    Observation, VirtualEnvironmentConfig, VirtualEnvironmentNoiseConfig, Action, Reward
-from bblib.utils import compute_angle, init_motion_kalman
+from bblib.defs import EnvironmentConfig, Position, Angle, EnvironmentState, Observation, Action, Reward
 
 
 class Environment(ABC):

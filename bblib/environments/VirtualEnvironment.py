@@ -86,4 +86,3 @@ class VirtualEnvironment(Environment):
 
         return Observation(estimated_pos, estimated_speed, angle, self.last_action, observed_pos,
                            self.ball.pos, self.compute_reward(observed_pos), False)
-
