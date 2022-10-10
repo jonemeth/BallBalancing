@@ -1,6 +1,8 @@
 import math
 from abc import ABC, abstractmethod
 
+from PIL import Image
+
 from bblib.defs import EnvironmentConfig, Position, Angle, EnvironmentState, Observation, Action, Reward
 
 
@@ -30,6 +32,12 @@ class Environment(ABC):
 
         return reward
 
+    def get_state(self) -> EnvironmentState:
+        return self.state
+
+    def get_config(self):
+        return self.config
+
     @abstractmethod
     def update(self, action: Action) -> Observation:
         raise NotImplementedError
@@ -46,8 +54,18 @@ class Environment(ABC):
     def observe_angle(self) -> Angle:
         raise NotImplementedError
 
-    def get_state(self) -> EnvironmentState:
-        return self.state
+    @abstractmethod
+    def render(self, observation: Observation) -> Image.Image:
+        raise NotImplementedError
 
-    def get_config(self):
-        return self.config
+
+class EnvironmentFactory(ABC):
+    def __init__(self, env_config: EnvironmentConfig):
+        self.env_config = env_config
+
+    def get_env_config(self):
+        return self.env_config
+
+    @abstractmethod
+    def create(self) -> Environment:
+        raise NotImplementedError

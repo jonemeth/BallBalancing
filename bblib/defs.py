@@ -94,7 +94,7 @@ class VirtualEnvironmentConfig:
 
 @dataclass
 class VirtualEnvironmentNoiseConfig:
-    position: float  # meters
+    position_std: float  # meters
 
 
 Episode = List[Observation]
