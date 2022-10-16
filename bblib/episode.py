@@ -3,15 +3,15 @@ from bblib.defs import Episode
 from bblib.environments.Environment import Environment
 
 
-def run_episode(env: Environment, agent: Agent, steps: int) -> Episode:
+def run_episode(env: Environment, agent: Agent, is_train: bool) -> Episode:
     observation = env.observe()
     episode = [observation]
 
-    agent.start()
-    for i in range(steps):
+    agent.start_episode(is_train)
+    for i in range(env.get_config().get_episode_steps()):
         action = agent.step(observation)
         observation = env.update(action)
         episode.append(observation)
-    agent.finish()
+    agent.finish_episode()
 
     return episode

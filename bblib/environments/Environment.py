@@ -69,7 +69,7 @@ class EnvironmentFactory(ABC):
     def __init__(self, env_config: EnvironmentConfig):
         self.env_config = env_config
 
-    def get_env_config(self):
+    def get_env_config(self) -> EnvironmentConfig:
         return self.env_config
 
     @abstractmethod

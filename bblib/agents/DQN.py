@@ -6,6 +6,7 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 
 from bblib.agents.Agent import Agent
+from bblib.agents.EpsilonScheduler import EpsilonScheduler
 from bblib.agents.nn import DefaultNetwork
 from bblib.defs import Observation, EnvironmentConfig, Action
 
@@ -39,41 +40,53 @@ class ExperienceDataset(Dataset):
 
 
 class DQN(Agent):
-    def __init__(self, env_config: EnvironmentConfig, action_counts: List[int], mem_size: int):
+    def __init__(self, env_config: EnvironmentConfig,
+                 action_counts: List[int],
+                 epsilon_scheduler: EpsilonScheduler,
+                 episodes_in_memory: int):
         super().__init__(action_counts)
         self.env_config = env_config
 
         self.network = DefaultNetwork(8, [400, 400], self.action_counts, torch.nn.SiLU)
+        self.epsilon_scheduler = epsilon_scheduler
 
-        self.experience_dataset = ExperienceDataset(mem_size)
+        self.experience_dataset = ExperienceDataset(episodes_in_memory*env_config.get_episode_steps())
         self.new_experiences = []
 
         self.last_observation = None
         self.last_action = None
 
-        self.mem_size = mem_size
         self.batch_size = 64
         self.num_train_iters = 128
         self.discount_factor = 0.95
-        self.epsilon = 0.0
 
         self.solver = torch.optim.Adam(self.network.parameters(), lr=0.001, betas=(0.9, 0.999), weight_decay=0.001)
+        self.is_train = False
 
-    def start(self):
+    def start_episode(self, is_train: bool):
+        self.is_train = is_train
         self.new_experiences = []
         self.last_observation = None
         self.last_action = None
 
-    def finish(self):
-        pass
+    def finish_episode(self):
+        if self.is_train:
+            self.experience_dataset.add_experiences([
+                (self._transform_observation(exp.observation),
+                 self._transform_action(exp.action),
+                 self._transform_observation(exp.next_observation),
+                 torch.tensor(exp.observation.reward),
+                 torch.tensor(exp.observation.done).float())
+                for exp in self.new_experiences])
+            self.epsilon_scheduler.update()
 
     def step(self, observation: Observation) -> Action:
         # Save experience
-        if self.last_observation is not None:
+        if self.is_train and self.last_observation is not None:
             assert self.last_action is not None
             self.new_experiences.append(Experience(self.last_observation, self.last_action, observation))
 
-        if random.random() < self.epsilon:
+        if self.is_train and random.random() < self.epsilon_scheduler.get_epsilon():
             actions = [random.randint(0, c - 1) for c in self.action_counts]
         else:
             self.network.eval()
@@ -121,16 +134,7 @@ class DQN(Agent):
         return loss
 
     def train(self):
-        self.experience_dataset.add_experiences([
-            (self._transform_observation(exp.observation),
-             self._transform_action(exp.action),
-             self._transform_observation(exp.next_observation),
-             torch.tensor(exp.observation.reward),
-             torch.tensor(exp.observation.done).float())
-            for exp in self.new_experiences])
-
         self.network.train()
-
         train_dataloader = DataLoader(self.experience_dataset, batch_size=self.batch_size, shuffle=True)
 
         for ix, batch in enumerate(train_dataloader):

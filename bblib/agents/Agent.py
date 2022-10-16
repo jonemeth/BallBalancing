@@ -16,11 +16,11 @@ class Agent(ABC):
         pass
 
     @abstractmethod
-    def start(self):
+    def start_episode(self, is_train: bool):
         pass
 
     @abstractmethod
-    def finish(self):
+    def finish_episode(self):
         pass
 
     @abstractmethod

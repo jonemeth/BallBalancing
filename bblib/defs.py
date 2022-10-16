@@ -48,11 +48,15 @@ class Limits:
 @dataclass
 class EnvironmentConfig:
     d_t: float
+    episode_secs: float
     limits: Limits
     max_observation: Position
     max_rotation: Rotation
     mid_rotation: Rotation
     max_angle: Angle
+
+    def get_episode_steps(self):
+        return round(self.episode_secs / self.d_t)
 
 
 @dataclass

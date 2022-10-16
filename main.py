@@ -1,5 +1,4 @@
 from bblib.agents.Agent import Agent
-from bblib.agents.DQN import DQN
 from bblib.environments.Environment import EnvironmentFactory
 from bblib.episode import run_episode
 
@@ -7,28 +6,22 @@ from utils.config import load_config
 
 
 KEY_ENVIRONMENT_FACTORY = "environmentFactory"
+KEY_AGENT = "agent"
 
 
 def main():
     config = load_config('train.yaml')
     env_factory: EnvironmentFactory = config.get(KEY_ENVIRONMENT_FACTORY)
+    agent: Agent = config.get(KEY_AGENT)
 
     num_episodes = 400
-    episode_secs = 15.0
-    episode_steps = round(episode_secs / env_factory.get_env_config().d_t)
-    start_eps = 0.5
-    end_eps = 0.1
-    eps_episodes = num_episodes // 2
-
-    agent: Agent = DQN(env_factory.get_env_config(), [3, 3], mem_size=50*episode_steps)
 
     for i in range(num_episodes):
         env = env_factory.create()
 
-        agent.epsilon = start_eps - (start_eps-end_eps) * min(1.0, i / eps_episodes)
-        episode = run_episode(env, agent, episode_steps)
+        episode = run_episode(env, agent, True)
         avg_reward = sum([observation.reward for observation in episode]) / len(episode)
-        print(i, avg_reward, agent.epsilon)
+        print(i, avg_reward, agent.epsilon_scheduler.get_epsilon())
 
         agent.train()
 
@@ -36,7 +29,7 @@ def main():
             agent.epsilon = -1.0
             env = env_factory.create()
 
-            episode = run_episode(env, agent, episode_steps)
+            episode = run_episode(env, agent, False)
 
             frames = []
             for observation in episode:
