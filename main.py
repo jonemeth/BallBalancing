@@ -1,9 +1,7 @@
-import sys
-
 from bblib.agents.Agent import Agent
 from bblib.agents.DQN import DQN
-from bblib.defs import Episode
-from bblib.environments.Environment import Environment, EnvironmentFactory
+from bblib.environments.Environment import EnvironmentFactory
+from bblib.episode import run_episode
 
 from utils.config import load_config
 
@@ -11,22 +9,8 @@ from utils.config import load_config
 KEY_ENVIRONMENT_FACTORY = "environmentFactory"
 
 
-def run_episode(env: Environment, agent: Agent, steps: int) -> Episode:
-    observation = env.observe()
-    episode = [observation]
-
-    agent.start()
-    for i in range(steps):
-        action = agent.step(observation)
-        observation = env.update(action)
-        episode.append(observation)
-    agent.finish()
-
-    return episode
-
-
 def main():
-    config = load_config('test.yaml')
+    config = load_config('train.yaml')
     env_factory: EnvironmentFactory = config.get(KEY_ENVIRONMENT_FACTORY)
 
     num_episodes = 400

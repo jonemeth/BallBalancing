@@ -42,9 +42,8 @@ class DQN(Agent):
     def __init__(self, env_config: EnvironmentConfig, action_counts: List[int], mem_size: int):
         super().__init__(action_counts)
         self.env_config = env_config
-        self.observation_dims = 8
 
-        self.network = DefaultNetwork(self.observation_dims, [400, 400], self.action_counts, torch.nn.SiLU)
+        self.network = DefaultNetwork(8, [400, 400], self.action_counts, torch.nn.SiLU)
 
         self.experience_dataset = ExperienceDataset(mem_size)
         self.new_experiences = []
