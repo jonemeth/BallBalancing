@@ -8,6 +8,7 @@ import yaml
 KEY_MODULES = "MODULES"
 KEY_CLASS = "CLASS"
 KEY_REF = "REF"
+KEY_IMPORT = "IMPORT"
 
 
 def find_class(modules: List[str], class_name: str) -> Type:
@@ -32,8 +33,11 @@ def find_class(modules: List[str], class_name: str) -> Type:
     raise RuntimeError(f"Cannot find class {class_name}")
 
 
-def resolve_classes(config: Any, modules: List[str], parent_path: List[Any]) -> Any:
+def process(config: Any, modules: List[str], parent_path: List[Any]) -> Any:
     if isinstance(config, dict):
+        if KEY_IMPORT in config:
+            return load_config(config[KEY_IMPORT])
+
         if KEY_REF in config:
             assert 1 == len(config)
             ref_name = config[KEY_REF]
@@ -48,7 +52,7 @@ def resolve_classes(config: Any, modules: List[str], parent_path: List[Any]) -> 
 
         # Note: Can't use list comprehension: objects can refer to already resolved objects.
         for k, v in config.items():
-            config[k] = resolve_classes(v, modules, parent_path + [config])
+            config[k] = process(v, modules, parent_path + [config])
 
         if class_name is not None:
             class_type = find_class(modules, class_name)
@@ -57,7 +61,7 @@ def resolve_classes(config: Any, modules: List[str], parent_path: List[Any]) -> 
         return config
 
     if isinstance(config, list):
-        return [resolve_classes(v, modules, parent_path + [config]) for v in config]
+        return [process(v, modules, parent_path + [config]) for v in config]
 
     return config
 
@@ -72,11 +76,11 @@ def extract_modules(config: dict) -> List[str]:
     return modules
 
 
-def load_config(yaml_file: str) -> dict:
+def load_config(yaml_file: str) -> Any:
     with open(yaml_file, 'r') as file:
         config = yaml.safe_load(file)
 
     modules = extract_modules(config)
-    config = resolve_classes(config, modules, [])
+    config = process(config, modules, [])
 
     return config
