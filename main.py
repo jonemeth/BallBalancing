@@ -10,7 +10,7 @@ KEY_AGENT = "agent"
 
 
 def main():
-    config = load_config('train.yaml')
+    config = load_config('exps/default/train.yaml')
     env_factory: EnvironmentFactory = config.get(KEY_ENVIRONMENT_FACTORY)
     agent: Agent = config.get(KEY_AGENT)
 

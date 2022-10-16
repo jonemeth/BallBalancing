@@ -1,0 +1,38 @@
+MODULES:
+  - "bblib.environments.VirtualEnvironment"
+  - "bblib.agents.DQN"
+  - "bblib.agents.EpsilonScheduler"
+
+env_config:
+  IMPORT: 'exps/default/env_config.yaml'
+
+random_virtual_env_config:
+  CLASS: 'RandomVirtualEnvironmentConfig'
+  max_gravity_offset: 3.0
+  max_angle_offset: 0.10
+  max_angle_scale: 0.3333
+
+virtual_env_noise_cfg:
+  CLASS: 'VirtualEnvironmentNoiseConfig'
+  position_std: 0.01
+
+environmentFactory:
+  CLASS: 'RandomVirtualEnvironmentFactory'
+  env_config:
+    REF: "env_config"
+  random_virtual_env_config:
+    REF: "random_virtual_env_config"
+  virtual_env_noise_cfg:
+    REF: "virtual_env_noise_cfg"
+
+agent:
+  CLASS: 'DQN'
+  env_config:
+    REF: "env_config"
+  action_counts: [3, 3]
+  epsilon_scheduler:
+    CLASS: 'LinearEpsilonScheduler'
+    start_eps: 0.5
+    end_eps: 0.1
+    num_steps: 200
+  episodes_in_memory: 50
