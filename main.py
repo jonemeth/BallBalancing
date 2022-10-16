@@ -11,7 +11,7 @@ from utils.config import load_config
 KEY_ENVIRONMENT_FACTORY = "environmentFactory"
 
 
-def run_episode(env: Environment, agent: Agent, steps) -> Episode:
+def run_episode(env: Environment, agent: Agent, steps: int) -> Episode:
     observation = env.observe()
     episode = [observation]
 

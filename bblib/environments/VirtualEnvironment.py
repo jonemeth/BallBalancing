@@ -24,7 +24,6 @@ class VirtualEnvironment(Environment):
         self.ball = ball
         self.noise_cfg = noise_cfg
         self.kalman: Optional[KalmanFilter] = None
-        self.last_action = Action(0, 0)
 
     def observe_position(self) -> Position:
         noise = Position(np.random.normal(scale=self.noise_cfg.position_std),
@@ -35,12 +34,12 @@ class VirtualEnvironment(Environment):
         return compute_angle(self.config, self.state)
 
     def update(self, action: Action) -> Observation:
+        self.actions.append(action)
+
         self.state.rot.x = max(-self.config.max_rotation.x,
                                min(self.config.max_rotation.x, self.state.rot.x + action.x))
         self.state.rot.y = max(-self.config.max_rotation.y,
                                min(self.config.max_rotation.y, self.state.rot.y + action.y))
-
-        self.last_action = action
 
         angle = compute_angle(self.config, self.state)
         noisy_angle_x = angle.x * self.virtual_config.angle_scale.x + self.virtual_config.angle_offset.x
@@ -85,9 +84,10 @@ class VirtualEnvironment(Environment):
         estimated_speed = Speed(float(self.kalman.x[2]), float(self.kalman.x[3]))
 
         angle = self.observe_angle()
+        action = self.actions[-1] if 1 <= len(self.actions) else None
 
-        return Observation(estimated_pos, estimated_speed, angle, self.last_action, observed_pos,
-                           self.ball.pos, self.compute_reward(observed_pos), False)
+        return Observation(estimated_pos, estimated_speed, angle, action, observed_pos,
+                           self.ball.pos, self._compute_reward(observed_pos), False)
 
     def render(self, observation: Observation) -> Image.Image:
         height = 200
