@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from pathlib import Path
 from typing import List
 
 from bblib.defs import Observation, Action
@@ -13,16 +14,20 @@ class Agent(ABC):
 
     @abstractmethod
     def step(self, observation: Observation) -> Action:
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def start_episode(self, is_train: bool):
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def finish_episode(self):
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def train(self):
-        pass
+        raise NotImplementedError
+
+    @abstractmethod
+    def save(self, filename: Path):
+        raise NotImplementedError

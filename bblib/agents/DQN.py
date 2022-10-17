@@ -1,5 +1,6 @@
 import random
 from dataclasses import dataclass
+from pathlib import Path
 from typing import List
 
 import torch
@@ -147,6 +148,9 @@ class DQN(Agent):
 
             if ix + 1 >= self.num_train_iters:
                 break
+
+    def save(self, filename: Path):
+        torch.save(self.network.state_dict(), filename)
 
     def _transform_observation(self, observation: Observation):
         last_action = observation.last_action if observation.last_action is not None else Action(0, 0)
