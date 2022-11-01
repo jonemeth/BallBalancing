@@ -1,4 +1,5 @@
 import random
+from typing import Tuple, Optional
 
 import numpy as np
 from filterpy.kalman import KalmanFilter
@@ -77,3 +78,13 @@ def init_motion_kalman(pos: Position, d_t: float, magnitude_of_acceleration_nois
     f.P = (0.1**2) * np.eye(4)
 
     return f
+
+
+def draw_spot(img: np.ndarray, u: float, v: float, color: Tuple[int, int, int], spot_radius: Optional[int] = 2):
+    """ u and v are between 0.0..+1.0 """
+    size = img.shape
+    u = round(size[0] * (1.0-u))
+    v = round(size[1] * v)
+    u = int(max(spot_radius, min(size[0] - 1 - spot_radius, u)))
+    v = int(max(spot_radius, min(size[1] - 1 - spot_radius, v)))
+    img[u - spot_radius:u + spot_radius, v - spot_radius:v + spot_radius, :] = color

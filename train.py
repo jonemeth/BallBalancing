@@ -2,6 +2,8 @@ import os
 from datetime import datetime
 from pathlib import Path
 
+from PIL import Image
+
 from bblib.agents.Agent import Agent
 from bblib.environments.Environment import EnvironmentFactory
 from bblib.episode import run_episode
@@ -45,7 +47,7 @@ def main():
 
             frames = []
             for observation in episode:
-                frames.append(env.render(observation))
+                frames.append(Image.fromarray(env.render(observation)))
 
             frames[0].save(f"out{i + 1:06d}.gif", format='GIF', append_images=frames[1:],
                            save_all=True, duration=env_factory.get_env_config().d_t * 1000, loop=0)

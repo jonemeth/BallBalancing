@@ -2,9 +2,10 @@ import math
 from abc import ABC, abstractmethod
 from typing import List
 
-from PIL import Image
+import numpy as np
 
 from bblib.defs import EnvironmentConfig, Position, Angle, EnvironmentState, Observation, Action, Reward
+from bblib.utils import draw_spot
 
 
 class Environment(ABC):
@@ -38,6 +39,40 @@ class Environment(ABC):
 
         return reward
 
+    def render(self, observation: Observation) -> np.ndarray:
+        height = 200
+        width = round(height * (self.config.limits.max_y / self.config.limits.max_x))
+        size = (height, width, 3)
+        angle_scale = math.sin(max(self.config.max_angle.x, self.config.max_angle.y))
+
+        img = np.zeros(size, dtype=np.uint8)
+
+        draw_spot(img, 0.5, 0.5, (64, 64, 64))
+
+        x = (observation.estimated_pos.x + self.config.limits.max_x) / (2.0 * self.config.limits.max_x)
+        y = (observation.estimated_pos.y + self.config.limits.max_y) / (2.0 * self.config.limits.max_y)
+        draw_spot(img, x, y, (255, 255, 255))
+
+        x = 0.5 + math.sin(observation.angle.x) / angle_scale
+        y = 0.5 + math.sin(observation.angle.y) / angle_scale
+        draw_spot(img, x, y, (255, 0, 255))
+
+        sx = (observation.estimated_pos.x + observation.estimated_speed.x + self.config.limits.max_x) / \
+             (2.0 * self.config.limits.max_x)
+        sy = (observation.estimated_pos.y + observation.estimated_speed.y + self.config.limits.max_y) / \
+             (2.0 * self.config.limits.max_y)
+        draw_spot(img, sx, sy, (255, 0, 0))
+
+        # x = (observation.observed_pos.x + config.limits.max_x) / (2.0 * config.limits.max_x)
+        # y = (observation.observed_pos.y + config.limits.max_y) / (2.0 * config.limits.max_y)
+        # draw_spot(x, y, (0, 255, 0))
+
+        x = (observation.real_pos.x + self.config.limits.max_x) / (2.0 * self.config.limits.max_x)
+        y = (observation.real_pos.y + self.config.limits.max_y) / (2.0 * self.config.limits.max_y)
+        draw_spot(img, x, y, (0, 0, 255))
+
+        return img
+
     def get_state(self) -> EnvironmentState:
         return self.state
 
@@ -58,10 +93,6 @@ class Environment(ABC):
 
     @abstractmethod
     def observe_angle(self) -> Angle:
-        raise NotImplementedError
-
-    @abstractmethod
-    def render(self, observation: Observation) -> Image.Image:
         raise NotImplementedError
 
 

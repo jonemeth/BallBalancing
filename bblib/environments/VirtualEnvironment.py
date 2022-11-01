@@ -1,15 +1,14 @@
 import math
-from typing import Optional, Tuple
+from typing import Optional
 
 import numpy as np
-from PIL import Image
 from filterpy.kalman import KalmanFilter
 
 from bblib.defs import EnvironmentConfig, Position, Angle, EnvironmentState, VirtualBall, Speed, \
     Observation, VirtualEnvironmentConfig, VirtualEnvironmentNoiseConfig, Action, RandomVirtualEnvironmentConfig
 from bblib.environments.Environment import Environment, EnvironmentFactory
 from bblib.utils import compute_angle, init_motion_kalman, random_environment_state, \
-    random_virtual_environment_config, random_virtual_ball
+    random_virtual_environment_config, random_virtual_ball, draw_spot
 
 
 class VirtualEnvironment(Environment):
@@ -89,51 +88,15 @@ class VirtualEnvironment(Environment):
         return Observation(estimated_pos, estimated_speed, angle, action, observed_pos,
                            self.ball.pos, self._compute_reward(observed_pos), False)
 
-    def render(self, observation: Observation) -> Image.Image:
-        height = 200
-        width = round(height * (self.config.limits.max_y/self.config.limits.max_x))
-        size = (height, width, 3)
+    def render(self, observation: Observation) -> np.ndarray:
+        img = super().render(observation)
         angle_scale = math.sin(max(self.config.max_angle.x, self.config.max_angle.y))
-
-        img = np.zeros(size, dtype=np.uint8)
-
-        def draw_spot(u: float, v: float, color: Tuple[int, int, int], spot_radius: Optional[int] = 2):
-            """ u and v are between 0.0..+1.0 """
-            u = round(size[0]*u)
-            v = round(size[1]*v)
-            u = int(max(spot_radius, min(size[0] - 1 - spot_radius, u)))
-            v = int(max(spot_radius, min(size[1] - 1 - spot_radius, v)))
-            img[u - spot_radius:u + spot_radius, v - spot_radius:v + spot_radius, :] = color
-
-        draw_spot(0.5, 0.5, (64, 64, 64))
-
-        x = (observation.estimated_pos.x + self.config.limits.max_x) / (2.0 * self.config.limits.max_x)
-        y = (observation.estimated_pos.y + self.config.limits.max_y) / (2.0 * self.config.limits.max_y)
-        draw_spot(x, y, (255, 255, 255))
-
-        x = 0.5 + math.sin(observation.angle.x) / angle_scale
-        y = 0.5 + math.sin(observation.angle.y) / angle_scale
-        draw_spot(x, y, (255, 0, 255))
-
-        sx = (observation.estimated_pos.x + observation.estimated_speed.x + self.config.limits.max_x) / \
-             (2.0*self.config.limits.max_x)
-        sy = (observation.estimated_pos.y + observation.estimated_speed.y + self.config.limits.max_y) / \
-             (2.0*self.config.limits.max_y)
-        draw_spot(sx, sy, (255, 0, 0))
-
-        # x = (observation.observed_pos.x + config.limits.max_x) / (2.0 * config.limits.max_x)
-        # y = (observation.observed_pos.y + config.limits.max_y) / (2.0 * config.limits.max_y)
-        # draw_spot(x, y, (0, 255, 0))
-
-        x = (observation.real_pos.x + self.config.limits.max_x) / (2.0 * self.config.limits.max_x)
-        y = (observation.real_pos.y + self.config.limits.max_y) / (2.0 * self.config.limits.max_y)
-        draw_spot(x, y, (0, 0, 255))
 
         x = 0.5 + math.sin(self.virtual_config.angle_offset.x) / angle_scale
         y = 0.5 + math.sin(self.virtual_config.angle_offset.y) / angle_scale
-        draw_spot(x, y, (255, 255, 0))
+        draw_spot(img, x, y, (255, 255, 0))
 
-        return Image.fromarray(img)
+        return img
 
 
 class RandomVirtualEnvironmentFactory(EnvironmentFactory):
