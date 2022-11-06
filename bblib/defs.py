@@ -4,6 +4,7 @@ from typing import List, Optional
 
 GRAVITY = 9.81  # mm/s^2
 Reward = float
+MODEL_FILENAME = "model"
 
 
 @dataclass

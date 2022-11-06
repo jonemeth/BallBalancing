@@ -152,6 +152,9 @@ class DQN(Agent):
     def save(self, filename: Path):
         torch.save(self.network.state_dict(), filename)
 
+    def load(self, filename: Path):
+        self.network.load_state_dict(torch.load(filename))
+
     def _transform_observation(self, observation: Observation):
         last_action = observation.last_action if observation.last_action is not None else Action(0, 0)
         return torch.tensor([observation.estimated_pos.x / self.env_config.limits.max_x,

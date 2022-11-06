@@ -31,3 +31,7 @@ class Agent(ABC):
     @abstractmethod
     def save(self, filename: Path):
         raise NotImplementedError
+
+    @abstractmethod
+    def load(self, filename: Path):
+        raise NotImplementedError

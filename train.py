@@ -1,3 +1,4 @@
+import argparse
 import os
 from datetime import datetime
 from pathlib import Path
@@ -5,6 +6,7 @@ from pathlib import Path
 from PIL import Image
 
 from bblib.agents.Agent import Agent
+from bblib.defs import MODEL_FILENAME
 from bblib.environments.Environment import EnvironmentFactory
 from bblib.episode import run_episode
 from utils.config import load_config
@@ -18,7 +20,12 @@ KEY_SAVE_FOLDER_PREFIX = "save_folder_prefix"
 
 
 def main():
-    config = load_config('exps/default/train_real.yaml')
+    parser = argparse.ArgumentParser(description='Train')
+    parser.add_argument('config_file', type=str)
+    args = parser.parse_args()
+
+    config = load_config(args.config_file)
+
     env_factory: EnvironmentFactory = config.get(KEY_ENVIRONMENT_FACTORY)
     agent: Agent = config.get(KEY_AGENT)
 
@@ -27,7 +34,7 @@ def main():
 
     save_folder_suffix = datetime.now().strftime('%y%m%d%H%M%S')
     save_folder = Path(SAVES_ROOT) / (save_folder_prefix+"_"+save_folder_suffix)
-    model_file = save_folder / "model"
+    model_file = save_folder / MODEL_FILENAME
     os.makedirs(save_folder, exist_ok=True)
 
     for i in range(num_episodes):
