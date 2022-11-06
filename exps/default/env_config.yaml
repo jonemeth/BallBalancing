@@ -6,21 +6,13 @@ d_t: 0.05
 episode_secs: 15.0
 limits:
   CLASS: 'Limits'
-  max_x: 0.080
+  max_x: 0.075
   max_y: 0.090
-max_observation:
-  CLASS: 'Position'
-  x: 80
-  y: 90
 max_rotation:
   CLASS: 'Rotation'
   x: 20
   y: 20
-mid_rotation:
-  CLASS: 'Rotation'
-  x: 361
-  y: 364
 max_angle:
   CLASS: 'Angle'
-  x: 0.087 #0.1745
-  y: 0.087 #0.1745
+  x: 0.0872664  # 5 degrees
+  y: 0.0872664  # 5 degrees

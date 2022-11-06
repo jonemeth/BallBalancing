@@ -1,0 +1,14 @@
+MODULES:
+  - "bblib.agents.DQN"
+  - "bblib.agents.EpsilonScheduler"
+
+CLASS: 'DQN'
+env_config:
+  IMPORT: 'exps/default/env_config.yaml'
+action_counts: [3, 3]
+epsilon_scheduler:
+  CLASS: 'LinearEpsilonScheduler'
+  start_eps: 1.0
+  end_eps: 0.1
+  num_steps: 300
+episodes_in_memory: 50

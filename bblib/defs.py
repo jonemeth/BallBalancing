@@ -50,9 +50,7 @@ class EnvironmentConfig:
     d_t: float
     episode_secs: float
     limits: Limits
-    max_observation: Position
     max_rotation: Rotation
-    mid_rotation: Rotation
     max_angle: Angle
 
     def get_episode_steps(self):

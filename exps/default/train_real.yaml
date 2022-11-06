@@ -1,9 +1,8 @@
 MODULES:
   - "bblib.environments.RealEnvironment"
-  - "bblib.agents.DQN"
-  - "bblib.agents.EpsilonScheduler"
 
-save_folder_prefix: "virtual"
+
+save_folder_prefix: "real"
 num_episodes: 400
 
 env_config:
@@ -15,14 +14,6 @@ environmentFactory:
     REF: "env_config"
 
 agent:
-  CLASS: 'DQN'
-  env_config:
-    REF: "env_config"
-  action_counts: [3, 3]
-  epsilon_scheduler:
-    CLASS: 'LinearEpsilonScheduler'
-    start_eps: 1.0
-    end_eps: 0.1
-    num_steps: 300
-  episodes_in_memory: 50
+  IMPORT: 'exps/default/agent.yaml'
+
 
