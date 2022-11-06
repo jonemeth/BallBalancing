@@ -48,7 +48,7 @@ class DQN(Agent):
         super().__init__(action_counts)
         self.env_config = env_config
 
-        self.network = DefaultNetwork(8, [400, 400], self.action_counts, torch.nn.SiLU)
+        self.network = DefaultNetwork(8, [200, 200], self.action_counts, torch.nn.ReLU)
         self.epsilon_scheduler = epsilon_scheduler
 
         self.experience_dataset = ExperienceDataset(episodes_in_memory*env_config.get_episode_steps())

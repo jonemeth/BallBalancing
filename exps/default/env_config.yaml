@@ -14,13 +14,13 @@ max_observation:
   y: 90
 max_rotation:
   CLASS: 'Rotation'
-  x: 10
-  y: 10
+  x: 20
+  y: 20
 mid_rotation:
   CLASS: 'Rotation'
   x: 361
   y: 364
 max_angle:
   CLASS: 'Angle'
-  x: 0.0420877292
-  y: 0.0655342552
+  x: 0.087 #0.1745
+  y: 0.087 #0.1745

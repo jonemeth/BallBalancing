@@ -39,8 +39,7 @@ def main():
 
         agent.train()
 
-        if (i + 1) % 100 == 0:
-            agent.epsilon = -1.0
+        if (i + 1) % 100 == 0 or i >= num_episodes - 10:
             env = env_factory.create()
 
             episode = run_episode(env, agent, False)

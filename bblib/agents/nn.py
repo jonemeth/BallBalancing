@@ -24,4 +24,3 @@ class DefaultNetwork(nn.Module):
         x = self.fcs(x)
 
         return [out(x) for out in self.fc_outs]
-

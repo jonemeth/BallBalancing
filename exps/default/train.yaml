@@ -17,7 +17,7 @@ random_virtual_env_config:
 
 virtual_env_noise_cfg:
   CLASS: 'VirtualEnvironmentNoiseConfig'
-  position_std: 0.01
+  position_std: 0.005
 
 environmentFactory:
   CLASS: 'RandomVirtualEnvironmentFactory'
@@ -35,8 +35,8 @@ agent:
   action_counts: [3, 3]
   epsilon_scheduler:
     CLASS: 'LinearEpsilonScheduler'
-    start_eps: 0.5
+    start_eps: 1.0
     end_eps: 0.1
-    num_steps: 200
+    num_steps: 300
   episodes_in_memory: 50
 

@@ -19,18 +19,20 @@ class Environment(ABC):
 
         dx = observed_pos.x / self.config.limits.max_x
         dy = observed_pos.y / self.config.limits.max_y
-        distance = math.sqrt(dx ** 2 + dy ** 2)
-        reward += math.sqrt(2.0) - distance
+        # distance = math.sqrt(dx ** 2 + dy ** 2)
+        # reward += math.sqrt(2.0) - distance
+        distance = (dx ** 2 + dy ** 2)
+        reward += 2.0 - distance
 
         if abs(observed_pos.x) > 0.8*self.config.limits.max_x or \
                 abs(observed_pos.y) > 0.8*self.config.limits.max_y:
-            reward -= 5.0 * math.sqrt(2.0)
+            reward -= 8.0  # 4.0* math.sqrt(2.0)
 
-        if 2 <= len(self.actions):
-            action1 = self.actions[-2]
-            action2 = self.actions[-1]
-            rot_diff_dist = (action1.x - action2.x) ** 2 + (action1.y - action2.y) ** 2
-            reward -= rot_diff_dist / 20.0
+        # if 2 <= len(self.actions):
+        #     action1 = self.actions[-2]
+        #     action2 = self.actions[-1]
+        #     rot_diff_dist = (action1.x - action2.x) ** 2 + (action1.y - action2.y) ** 2
+        #     reward -= rot_diff_dist / 20.0
         #
         # if 1 <= len(self.actions):
         #     action = self.actions[-1]
