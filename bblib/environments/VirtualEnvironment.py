@@ -2,12 +2,11 @@ import math
 from typing import Optional
 
 import numpy as np
-from filterpy.kalman import KalmanFilter
 
 from bblib.defs import EnvironmentConfig, Position, Angle, EnvironmentState, VirtualBall, Speed, \
     Observation, VirtualEnvironmentConfig, VirtualEnvironmentNoiseConfig, Action, RandomVirtualEnvironmentConfig
 from bblib.environments.Environment import Environment, EnvironmentFactory
-from bblib.utils import compute_angle, init_motion_kalman, random_environment_state, \
+from bblib.utils import compute_angle, random_environment_state, \
     random_virtual_environment_config, random_virtual_ball, draw_spot
 
 
@@ -22,12 +21,14 @@ class VirtualEnvironment(Environment):
         self.virtual_config = virtual_config
         self.ball = ball
         self.noise_cfg = noise_cfg
-        self.kalman: Optional[KalmanFilter] = None
 
     def observe_position(self) -> Position:
         noise = Position(np.random.normal(scale=self.noise_cfg.position_std),
                          np.random.normal(scale=self.noise_cfg.position_std))
         return Position(self.ball.pos.x + noise.x, self.ball.pos.y + noise.y)
+
+    def observe_real_position(self) -> Optional[Position]:
+        return self.ball.pos
 
     def observe_angle(self) -> Angle:
         return compute_angle(self.config, self.state)
@@ -69,24 +70,6 @@ class VirtualEnvironment(Environment):
             self.ball.speed.y *= -0.5
 
         return self.observe()
-
-    def observe(self) -> Observation:
-        observed_pos = self.observe_position()
-
-        if not self.kalman:
-            self.kalman = init_motion_kalman(observed_pos, self.config.d_t)
-        else:
-            self.kalman.predict()
-            self.kalman.update([observed_pos.x, observed_pos.y])
-
-        estimated_pos = Position(float(self.kalman.x[0]), float(self.kalman.x[1]))
-        estimated_speed = Speed(float(self.kalman.x[2]), float(self.kalman.x[3]))
-
-        angle = self.observe_angle()
-        action = self.actions[-1] if 1 <= len(self.actions) else None
-
-        return Observation(estimated_pos, estimated_speed, angle, action, observed_pos,
-                           self.ball.pos, self._compute_reward(observed_pos), False)
 
     def render(self, observation: Observation) -> np.ndarray:
         img = super().render(observation)

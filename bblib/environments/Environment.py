@@ -1,11 +1,12 @@
 import math
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Optional
 
 import numpy as np
+from filterpy.kalman import KalmanFilter
 
-from bblib.defs import EnvironmentConfig, Position, Angle, EnvironmentState, Observation, Action, Reward
-from bblib.utils import draw_spot
+from bblib.defs import EnvironmentConfig, Position, Angle, EnvironmentState, Observation, Action, Reward, Speed
+from bblib.utils import draw_spot, init_motion_kalman
 
 
 class Environment(ABC):
@@ -13,6 +14,26 @@ class Environment(ABC):
         self.config = config
         self.state = init_env_state
         self.actions: List[Action] = []
+        self.kalman: Optional[KalmanFilter] = None
+
+    def observe(self) -> Observation:
+        observed_pos = self.observe_position()
+
+        if not self.kalman:
+            self.kalman = init_motion_kalman(observed_pos, self.config.d_t)
+        else:
+            self.kalman.predict()
+            self.kalman.update([observed_pos.x, observed_pos.y])
+
+        estimated_pos = Position(float(self.kalman.x[0]), float(self.kalman.x[1]))
+        estimated_speed = Speed(float(self.kalman.x[2]), float(self.kalman.x[3]))
+        real_pos = self.observe_real_position()
+
+        angle = self.observe_angle()
+        action = self.actions[-1] if 1 <= len(self.actions) else None
+
+        return Observation(estimated_pos, estimated_speed, angle, action, observed_pos,
+                           real_pos, self._compute_reward(observed_pos), False)
 
     def _compute_reward(self, observed_pos: Position) -> Reward:
         reward = 0.0
@@ -87,11 +108,10 @@ class Environment(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def observe(self) -> Observation:
+    def observe_position(self) -> Position:
         raise NotImplementedError
 
-    @abstractmethod
-    def observe_position(self) -> Position:
+    def observe_real_position(self) -> Optional[Position]:
         raise NotImplementedError
 
     @abstractmethod
