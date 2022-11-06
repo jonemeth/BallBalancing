@@ -69,9 +69,10 @@ class Environment(ABC):
         # y = (observation.observed_pos.y + config.limits.max_y) / (2.0 * config.limits.max_y)
         # draw_spot(x, y, (0, 255, 0))
 
-        x = (observation.real_pos.x + self.config.limits.max_x) / (2.0 * self.config.limits.max_x)
-        y = (observation.real_pos.y + self.config.limits.max_y) / (2.0 * self.config.limits.max_y)
-        draw_spot(img, x, y, (0, 0, 255))
+        if observation.real_pos is not None:
+            x = (observation.real_pos.x + self.config.limits.max_x) / (2.0 * self.config.limits.max_x)
+            y = (observation.real_pos.y + self.config.limits.max_y) / (2.0 * self.config.limits.max_y)
+            draw_spot(img, x, y, (0, 0, 255))
 
         return img
 
