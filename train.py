@@ -18,7 +18,7 @@ KEY_SAVE_FOLDER_PREFIX = "save_folder_prefix"
 
 
 def main():
-    config = load_config('exps/default/train.yaml')
+    config = load_config('exps/default/train_real.yaml')
     env_factory: EnvironmentFactory = config.get(KEY_ENVIRONMENT_FACTORY)
     agent: Agent = config.get(KEY_AGENT)
 
