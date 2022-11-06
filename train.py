@@ -52,7 +52,6 @@ def main():
                            save_all=True, duration=env_factory.get_env_config().d_t * 1000, loop=0)
 
     agent.save(model_file)
-
     print("Bye!")
 
 
