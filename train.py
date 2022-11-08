@@ -37,12 +37,16 @@ def main():
     model_file = save_folder / MODEL_FILENAME
     os.makedirs(save_folder, exist_ok=True)
 
+    running_reward = None
     for i in range(num_episodes):
         env = env_factory.create()
 
         episode = run_episode(env, agent, True)
         avg_reward = sum([observation.reward for observation in episode]) / len(episode)
-        print(i, avg_reward, agent.epsilon_scheduler.get_epsilon())
+
+        running_reward = avg_reward if running_reward is None else 0.99*running_reward + 0.01*avg_reward
+
+        print(i, avg_reward, running_reward, agent.epsilon_scheduler.get_epsilon())
 
         agent.train()
 
