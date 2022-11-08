@@ -1,6 +1,7 @@
 MODULES:
   - "bblib.agents.DQN"
   - "bblib.agents.EpsilonScheduler"
+  - "torch.optim.lr_scheduler"
 
 CLASS: 'DQN'
 env_config:
@@ -11,4 +12,10 @@ epsilon_scheduler:
   start_eps: 0.75
   end_eps: 0.1
   num_steps: 350
+
 episodes_in_memory: 50
+
+lr_scheduler_factory:
+  CLASS: 'LRFactory'
+  scheduler: "ExponentialLR"
+  gamma: 0.9943

@@ -40,11 +40,21 @@ class ExperienceDataset(Dataset):
         return self.experiences[idx]
 
 
+class LRFactory:
+    def __init__(self, scheduler: str, **kwargs):
+        self.kwargs = kwargs
+        self.Scheduler = getattr(torch.optim.lr_scheduler, scheduler)
+
+    def create(self, optimizer: torch.optim.Optimizer):
+        return self.Scheduler(optimizer, **self.kwargs)
+
+
 class DQN(Agent):
     def __init__(self, env_config: EnvironmentConfig,
                  action_counts: List[int],
                  epsilon_scheduler: EpsilonScheduler,
-                 episodes_in_memory: int):
+                 episodes_in_memory: int,
+                 lr_scheduler_factory: LRFactory):
         super().__init__(action_counts)
         self.env_config = env_config
 
@@ -61,7 +71,9 @@ class DQN(Agent):
         self.num_train_iters = 128
         self.discount_factor = 0.95
 
-        self.solver = torch.optim.Adam(self.network.parameters(), lr=0.001, betas=(0.9, 0.999), weight_decay=0.001)
+        self.solver = torch.optim.Adam(self.network.parameters(), lr=0.01, betas=(0.9, 0.999), weight_decay=0.001)
+        self.lr_scheduler = lr_scheduler_factory.create(self.solver)
+
         self.is_train = False
 
     def start_episode(self, is_train: bool):
@@ -148,6 +160,8 @@ class DQN(Agent):
 
             if ix + 1 >= self.num_train_iters:
                 break
+
+        self.lr_scheduler.step()
 
     def save(self, filename: Path):
         torch.save(self.network.state_dict(), filename)
