@@ -141,7 +141,7 @@ class DQN(Agent):
         for ix, batch in enumerate(train_dataloader):
             self.solver.zero_grad()
 
-            loss = self._loss(batch)
+            loss = self._loss2(batch)
 
             loss.backward()
             self.solver.step()
@@ -157,12 +157,12 @@ class DQN(Agent):
 
     def _transform_observation(self, observation: Observation):
         last_action = observation.last_action if observation.last_action is not None else Action(0, 0)
-        return torch.tensor([observation.estimated_pos.x / self.env_config.limits.max_x,
-                             observation.estimated_pos.y / self.env_config.limits.max_y,
-                             observation.estimated_speed.x / self.env_config.limits.max_x,
-                             observation.estimated_speed.y / self.env_config.limits.max_y,
-                             observation.angle.x / self.env_config.max_angle.x,
-                             observation.angle.y / self.env_config.max_angle.y,
+        return torch.tensor([2.0 * observation.estimated_pos.x / self.env_config.limits.max_x,
+                             2.0 * observation.estimated_pos.y / self.env_config.limits.max_y,
+                             2.0 * observation.estimated_speed.x / self.env_config.limits.max_x,
+                             2.0 * observation.estimated_speed.y / self.env_config.limits.max_y,
+                             2.0 * observation.angle.x / self.env_config.max_angle.x,
+                             2.0 * observation.angle.y / self.env_config.max_angle.y,
                              float(last_action.x),
                              float(last_action.y)])
 
