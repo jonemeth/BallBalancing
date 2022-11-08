@@ -10,7 +10,7 @@ action_counts: [3, 3]
 epsilon_scheduler:
   CLASS: 'LinearEpsilonScheduler'
   start_eps: 0.5
-  end_eps: 0.1
+  end_eps: 0.01
   num_steps: 350
 
 episodes_in_memory: 50

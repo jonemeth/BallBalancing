@@ -34,6 +34,7 @@ class ExperienceDataset(Dataset):
     def add_experiences(self, experiences: List[tuple]):
         self.experiences.extend(experiences)
         if len(self.experiences) > self.max_size:
+            random.shuffle(self.experiences)
             self.experiences = self.experiences[-self.max_size:]
 
     def __getitem__(self, idx):
@@ -61,7 +62,8 @@ class DQN(Agent):
         self.network = DefaultNetwork(8, [200, 200], self.action_counts, torch.nn.GELU)
         self.epsilon_scheduler = epsilon_scheduler
 
-        self.experience_dataset = ExperienceDataset(episodes_in_memory*env_config.get_episode_steps())
+        self.max_num_experiences = episodes_in_memory*env_config.get_episode_steps()
+        self.experience_dataset = ExperienceDataset(self.max_num_experiences)
         self.new_experiences = []
 
         self.last_observation = None
@@ -147,6 +149,9 @@ class DQN(Agent):
         return loss
 
     def train(self):
+        if len(self.experience_dataset) < self.max_num_experiences // 2:
+            return
+
         self.network.train()
         train_dataloader = DataLoader(self.experience_dataset, batch_size=self.batch_size, shuffle=True)
 
