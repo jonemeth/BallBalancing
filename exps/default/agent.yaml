@@ -9,7 +9,7 @@ env_config:
 action_counts: [3, 3]
 epsilon_scheduler:
   CLASS: 'LinearEpsilonScheduler'
-  start_eps: 0.75
+  start_eps: 0.5
   end_eps: 0.1
   num_steps: 350
 
