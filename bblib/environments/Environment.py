@@ -42,7 +42,8 @@ class Environment(ABC):
         dy = observed_pos.y / self.config.limits.max_y
         # distance = math.sqrt(dx ** 2 + dy ** 2)
         # reward += math.sqrt(2.0) - distance
-        distance = (dx ** 2 + dy ** 2)
+        # distance = (dx ** 2 + dy ** 2)
+        distance = max(abs(dx), abs(dy))
         reward += 2.0 - distance
 
         # if abs(observed_pos.x) > 0.8*self.config.limits.max_x or \
@@ -75,9 +76,10 @@ class Environment(ABC):
         x = (observation.estimated_pos.x + self.config.limits.max_x) / (2.0 * self.config.limits.max_x)
         y = (observation.estimated_pos.y + self.config.limits.max_y) / (2.0 * self.config.limits.max_y)
         draw_spot(img, x, y, (255, 255, 255))
+        
 
-        x = 0.5 + math.sin(observation.angle.x) / angle_scale
-        y = 0.5 + math.sin(observation.angle.y) / angle_scale
+        x = 0.5 + math.sin(observation.angle.x) / (2.0*angle_scale)
+        y = 0.5 + math.sin(observation.angle.y) / (2.0*angle_scale)
         draw_spot(img, x, y, (255, 0, 255))
 
         sx = (observation.estimated_pos.x + observation.estimated_speed.x + self.config.limits.max_x) / \
@@ -86,9 +88,9 @@ class Environment(ABC):
              (2.0 * self.config.limits.max_y)
         draw_spot(img, sx, sy, (255, 0, 0))
 
-        # x = (observation.observed_pos.x + config.limits.max_x) / (2.0 * config.limits.max_x)
-        # y = (observation.observed_pos.y + config.limits.max_y) / (2.0 * config.limits.max_y)
-        # draw_spot(x, y, (0, 255, 0))
+        x = (observation.observed_pos.x + self.config.limits.max_x) / (2.0 * self.config.limits.max_x)
+        y = (observation.observed_pos.y + self.config.limits.max_y) / (2.0 * self.config.limits.max_y)
+        draw_spot(img, x, y, (0, 255, 0))
 
         if observation.real_pos is not None:
             x = (observation.real_pos.x + self.config.limits.max_x) / (2.0 * self.config.limits.max_x)

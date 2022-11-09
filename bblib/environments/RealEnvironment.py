@@ -17,7 +17,7 @@ class RealEnvironment(Environment):
         self.ser = serial.Serial('/dev/ttyACM0', 9600)
         self.kit = ServoKit(channels=16)
 
-        self.center = Angle(85.1, 79.0)
+        self.center = Angle(79.0, 85.0)
         self.set_servo()
         self.observe_position()
         time.sleep(2.0)
@@ -26,12 +26,14 @@ class RealEnvironment(Environment):
         angle = self.observe_angle()
         x = self.center.x + angle.x * 180 / 3.141592
         y = self.center.y + angle.y * 180 / 3.141592
-        self.kit.servo[0].angle = x
-        self.kit.servo[1].angle = y
+        
+        self.kit.servo[0].angle = y
+        self.kit.servo[1].angle = x
 
     def observe_position(self) -> Position:
         self.ser.reset_input_buffer()
         while True:
+            read_serial = self.ser.readline().decode("utf-8").strip()
             read_serial = self.ser.readline().decode("utf-8").strip()
             tokens = read_serial.split(' , ')
             if 2 != len(tokens):
