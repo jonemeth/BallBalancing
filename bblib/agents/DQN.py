@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import List
 
+import numpy as np
 import torch
 from torch.utils.data import Dataset, DataLoader
 
@@ -102,7 +103,24 @@ class DQN(Agent):
             self.new_experiences.append(Experience(self.last_observation, self.last_action, observation))
 
         if self.is_train and random.random() < self.epsilon_scheduler.get_epsilon():
-            actions = [random.randint(0, c - 1) for c in self.action_counts]
+            assert 2 == len(self.action_counts) and 3 == self.action_counts[0] and 3 == self.action_counts[1]
+            # actions = [random.randint(0, c - 1) for c in self.action_counts]
+
+            w1x = (observation.angle.x / self.env_config.max_angle.x + 1) / 2.0
+            w2x = (1 - observation.angle.x / self.env_config.max_angle.x) / 2.0
+            w1y = (observation.angle.y / self.env_config.max_angle.y + 1) / 2.0
+            w2y = (1 - observation.angle.y / self.env_config.max_angle.y) / 2.0
+
+            p1x = 0.4 / 1.4
+            p0x = w1x / (1.4)
+            p2x = w2x / (1.4)
+
+            p1y = 0.4 / 1.4
+            p0y = w1y / (1.4)
+            p2y = w2y / (1.4)
+
+            actions = [np.random.choice([0, 1, 2], p=[p0x, p1x, p2x]),
+                       np.random.choice([0, 1, 2], p=[p0y, p1y, p2y])]
         else:
             self.network.eval()
             actions = self.network(self._transform_observation(observation).unsqueeze(0))
