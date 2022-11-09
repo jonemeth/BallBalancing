@@ -119,8 +119,8 @@ class DQN(Agent):
             p0y = w1y / (1.4)
             p2y = w2y / (1.4)
 
-            actions = [np.random.choice([0, 1, 2], p=[p0x, p1x, p2x]),
-                       np.random.choice([0, 1, 2], p=[p0y, p1y, p2y])]
+            actions = [int(np.random.choice([0, 1, 2], p=[p0x, p1x, p2x])),
+                       int(np.random.choice([0, 1, 2], p=[p0y, p1y, p2y]))]
         else:
             self.network.eval()
             actions = self.network(self._transform_observation(observation).unsqueeze(0))
