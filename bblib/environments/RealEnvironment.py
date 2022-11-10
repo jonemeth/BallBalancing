@@ -20,7 +20,8 @@ class RealEnvironment(Environment):
         self.center = Angle(79.0, 85.0)
         self.set_servo()
         self.observe_position()
-        time.sleep(2.0)
+        time.sleep(1.0)
+        self.last_time = time.time()
 
     def set_servo(self):
         angle = self.observe_angle()
@@ -33,7 +34,7 @@ class RealEnvironment(Environment):
     def observe_position(self) -> Position:
         self.ser.reset_input_buffer()
         while True:
-            read_serial = self.ser.readline()
+            self.ser.readline()
             read_serial = self.ser.readline().decode("utf-8").strip()
             tokens = read_serial.split(' , ')
             if 2 != len(tokens):
@@ -59,8 +60,15 @@ class RealEnvironment(Environment):
                                min(self.config.max_rotation.y, self.state.rot.y + action.y))
 
         self.set_servo()
-        time.sleep(self.config.d_t)
 
+        d_t = time.time() - self.last_time
+
+        if d_t < self.config.d_t:
+            time.sleep(self.config.d_t-d_t)
+        else:
+            print("Warning: too slow!")
+
+        self.last_time = time.time()
         return self.observe()
 
     def render(self, observation: Observation) -> np.ndarray:

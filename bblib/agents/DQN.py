@@ -74,7 +74,7 @@ class DQN(Agent):
         self.num_train_iters = 128
         self.discount_factor = 0.95
 
-        self.solver = torch.optim.Adam(self.network.parameters(), lr=0.01, betas=(0.9, 0.999), weight_decay=0.001)
+        self.solver = torch.optim.Adam(self.network.parameters(), lr=0.001, betas=(0.9, 0.999), weight_decay=0.001)
         self.lr_scheduler = lr_scheduler_factory.create(self.solver)
 
         self.is_train = False
@@ -106,18 +106,18 @@ class DQN(Agent):
             assert 2 == len(self.action_counts)
             # actions = [random.randint(0, c - 1) for c in self.action_counts]
 
-            w1x = (observation.angle.x / self.env_config.max_angle.x + 1) / 2.0
-            w2x = (1 - observation.angle.x / self.env_config.max_angle.x) / 2.0
-            w1y = (observation.angle.y / self.env_config.max_angle.y + 1) / 2.0
-            w2y = (1 - observation.angle.y / self.env_config.max_angle.y) / 2.0
+            w1x = (observation.angle.x / self.env_config.max_angle.x + 1) / 2.0 + 0.4
+            w2x = (1 - observation.angle.x / self.env_config.max_angle.x) / 2.0 + 0.4
+            w1y = (observation.angle.y / self.env_config.max_angle.y + 1) / 2.0 + 0.4
+            w2y = (1 - observation.angle.y / self.env_config.max_angle.y) / 2.0 + 0.4
 
             if 3 == self.action_counts[0] and 3 == self.action_counts[1]:
-                probs_x = [w1x/1.4, 0.4/1.4, w2x/1.4]
-                probs_y = [w1y/1.4, 0.4/1.4, w2y/1.4]
+                probs_x = [w1x/2, 0.2/2, w2x/2]
+                probs_y = [w1y/2, 0.2/2, w2y/2]
                 values = [0, 1, 2]
             elif 5 == self.action_counts[0] and 5 == self.action_counts[1]:
-                probs_x = [w1x/2.8, w1x/2.8, 0.4/1.4, w2x/2.8, w2x/2.8]
-                probs_y = [w1y/2.8, w1y/2.8, 0.4/1.4, w2y/2.8, w2y/2.8]
+                probs_x = [w1x/4, w1x/4, 0.2/2, w2x/4, w2x/4]
+                probs_y = [w1y/4, w1y/4, 0.2/2, w2y/4, w2y/4]
                 values = [0, 1, 2, 3, 4]
             else:
                 raise RuntimeError

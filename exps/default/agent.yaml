@@ -18,4 +18,4 @@ episodes_in_memory: 50
 lr_scheduler_factory:
   CLASS: 'LRFactory'
   scheduler: "ExponentialLR"
-  gamma: 0.9943
+  gamma: 0.9999 #0.9943
