@@ -35,7 +35,7 @@ class ExperienceDataset(Dataset):
     def add_experiences(self, experiences: List[tuple]):
         self.experiences.extend(experiences)
         if len(self.experiences) > self.max_size:
-            random.shuffle(self.experiences)
+            #random.shuffle(self.experiences)
             self.experiences = self.experiences[-self.max_size:]
 
     def __getitem__(self, idx):
