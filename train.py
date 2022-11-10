@@ -44,7 +44,7 @@ def main():
         episode = run_episode(env, agent, True)
         avg_reward = sum([observation.reward for observation in episode]) / len(episode)
 
-        running_reward = avg_reward if running_reward is None else 0.99*running_reward + 0.01*avg_reward
+        running_reward = avg_reward if running_reward is None else 0.95*running_reward + 0.05*avg_reward
         lr = agent.lr_scheduler.get_last_lr()[0]
 
         print(i, avg_reward, running_reward, agent.epsilon_scheduler.get_epsilon(), lr)

@@ -33,7 +33,7 @@ class RealEnvironment(Environment):
     def observe_position(self) -> Position:
         self.ser.reset_input_buffer()
         while True:
-            read_serial = self.ser.readline().decode("utf-8").strip()
+            read_serial = self.ser.readline()
             read_serial = self.ser.readline().decode("utf-8").strip()
             tokens = read_serial.split(' , ')
             if 2 != len(tokens):
