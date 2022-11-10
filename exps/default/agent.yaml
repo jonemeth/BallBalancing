@@ -6,11 +6,11 @@ MODULES:
 CLASS: 'DQN'
 env_config:
   IMPORT: 'exps/default/env_config.yaml'
-action_counts: [3, 3]
+action_counts: [5, 5]
 epsilon_scheduler:
   CLASS: 'LinearEpsilonScheduler'
   start_eps: 0.5
-  end_eps: 0.01
+  end_eps: 0.1
   num_steps: 350
 
 episodes_in_memory: 50
