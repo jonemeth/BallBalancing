@@ -19,8 +19,12 @@ class DefaultNetwork(nn.Module):
             fc_outs.append(nn.Linear(hidden_layer_sizes[-1], d))
         self.fc_outs = nn.ModuleList(fc_outs)
 
+        #self.gamma = nn.Parameter(torch.zeros(1))
+        #self.beta = nn.Parameter(torch.zeros(1))
+
     def forward(self, x: torch.Tensor):
         assert 2 == len(x.shape)
         x = self.fcs(x)
 
         return [out(x) for out in self.fc_outs]
+        #return [self.gamma * out(x) + self.beta for out in self.fc_outs]

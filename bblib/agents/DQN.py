@@ -35,7 +35,7 @@ class ExperienceDataset(Dataset):
     def add_experiences(self, experiences: List[tuple]):
         self.experiences.extend(experiences)
         if len(self.experiences) > self.max_size:
-            #random.shuffle(self.experiences)
+            random.shuffle(self.experiences)
             self.experiences = self.experiences[-self.max_size:]
 
     def __getitem__(self, idx):
@@ -74,7 +74,7 @@ class DQN(Agent):
         self.num_train_iters = 128
         self.discount_factor = 0.95
 
-        self.solver = torch.optim.Adam(self.network.parameters(), lr=0.001, betas=(0.9, 0.999), weight_decay=0.001)
+        self.solver = torch.optim.AdamW(self.network.parameters(), lr=0.001, betas=(0.9, 0.999), weight_decay=0.001)
         self.lr_scheduler = lr_scheduler_factory.create(self.solver)
 
         self.is_train = False
@@ -103,27 +103,27 @@ class DQN(Agent):
             self.new_experiences.append(Experience(self.last_observation, self.last_action, observation))
 
         if self.is_train and random.random() < self.epsilon_scheduler.get_epsilon():
-            assert 2 == len(self.action_counts)
-            # actions = [random.randint(0, c - 1) for c in self.action_counts]
+            actions = [random.randint(0, c - 1) for c in self.action_counts]
 
-            w1x = (observation.angle.x / self.env_config.max_angle.x + 1) / 2.0 + 0.4
-            w2x = (1 - observation.angle.x / self.env_config.max_angle.x) / 2.0 + 0.4
-            w1y = (observation.angle.y / self.env_config.max_angle.y + 1) / 2.0 + 0.4
-            w2y = (1 - observation.angle.y / self.env_config.max_angle.y) / 2.0 + 0.4
-
-            if 3 == self.action_counts[0] and 3 == self.action_counts[1]:
-                probs_x = [w1x/2, 0.2/2, w2x/2]
-                probs_y = [w1y/2, 0.2/2, w2y/2]
-                values = [0, 1, 2]
-            elif 5 == self.action_counts[0] and 5 == self.action_counts[1]:
-                probs_x = [w1x/4, w1x/4, 0.2/2, w2x/4, w2x/4]
-                probs_y = [w1y/4, w1y/4, 0.2/2, w2y/4, w2y/4]
-                values = [0, 1, 2, 3, 4]
-            else:
-                raise RuntimeError
-
-            actions = [int(np.random.choice(values, p=probs_x)),
-                       int(np.random.choice(values, p=probs_y))]
+            # assert 2 == len(self.action_counts)
+            # w1x = (observation.angle.x / self.env_config.max_angle.x + 1) / 2.0 + 0.4
+            # w2x = (1 - observation.angle.x / self.env_config.max_angle.x) / 2.0 + 0.4
+            # w1y = (observation.angle.y / self.env_config.max_angle.y + 1) / 2.0 + 0.4
+            # w2y = (1 - observation.angle.y / self.env_config.max_angle.y) / 2.0 + 0.4
+            #
+            # if 3 == self.action_counts[0] and 3 == self.action_counts[1]:
+            #     probs_x = [w1x/2, 0.2/2, w2x/2]
+            #     probs_y = [w1y/2, 0.2/2, w2y/2]
+            #     values = [0, 1, 2]
+            # elif 5 == self.action_counts[0] and 5 == self.action_counts[1]:
+            #     probs_x = [w1x/4, w1x/4, 0.2/2, w2x/4, w2x/4]
+            #     probs_y = [w1y/4, w1y/4, 0.2/2, w2y/4, w2y/4]
+            #     values = [0, 1, 2, 3, 4]
+            # else:
+            #     raise RuntimeError
+            #
+            # actions = [int(np.random.choice(values, p=probs_x)),
+            #            int(np.random.choice(values, p=probs_y))]
         else:
             self.network.eval()
             actions = self.network(self._transform_observation(observation).unsqueeze(0))
@@ -132,8 +132,12 @@ class DQN(Agent):
         if 2 == len(self.action_counts):
             action = Action(actions[0] - self.action_counts[0] // 2, actions[1] - self.action_counts[1] // 2)
         elif 1 == len(self.action_counts):
-            assert 9 == self.action_counts[0]
-            action = Action(actions[0] // 3 - 1, actions[0] % 3 - 1)
+            if 9 == self.action_counts[0]:
+                action = Action(actions[0] // 3 - 1, actions[0] % 3 - 1)
+            elif 25 == self.action_counts[0]:
+                action = Action(actions[0] // 5 - 2, actions[0] % 5 - 2)
+            else:
+                raise RuntimeError
         else:
             raise NotImplementedError
 
@@ -171,11 +175,12 @@ class DQN(Agent):
 
     def train(self):
         if len(self.experience_dataset) < self.max_num_experiences // 2:
-            return
+            return None
 
         self.network.train()
         train_dataloader = DataLoader(self.experience_dataset, batch_size=self.batch_size, shuffle=True)
 
+        sum_loss = 0
         for ix, batch in enumerate(train_dataloader):
             self.solver.zero_grad()
 
@@ -184,10 +189,13 @@ class DQN(Agent):
             loss.backward()
             self.solver.step()
 
+            sum_loss += loss.item()
+
             if ix + 1 >= self.num_train_iters:
                 break
 
         self.lr_scheduler.step()
+        return sum_loss / (ix+1)
 
     def save(self, filename: Path):
         torch.save(self.network.state_dict(), filename)
@@ -218,8 +226,12 @@ class DQN(Agent):
                 action.y + self.action_counts[1] // 2,
             ]
         elif 1 == len(self.action_counts):
-            assert 9 == self.action_counts[0]
-            actions = [3 * (1 + action.x) + (1 + action.y)]
+            if 9 == self.action_counts[0]:
+                actions = [3 * (1 + action.x) + (1 + action.y)]
+            elif 25 == self.action_counts[0]:
+                actions = [5 * (2 + action.x) + (2 + action.y)]
+            else:
+                raise RuntimeError
         else:
             raise NotImplementedError
 

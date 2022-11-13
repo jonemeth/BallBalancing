@@ -38,18 +38,23 @@ def main():
     os.makedirs(save_folder, exist_ok=True)
 
     running_reward = None
+    running_loss = None
     for i in range(num_episodes):
         env = env_factory.create()
 
-        episode = run_episode(env, agent, True, 0.0001)
+        episode = run_episode(env, agent, True)
         avg_reward = sum([observation.reward for observation in episode]) / len(episode)
 
         running_reward = avg_reward if running_reward is None else 0.95*running_reward + 0.05*avg_reward
         lr = agent.lr_scheduler.get_last_lr()[0]
 
-        print(i, avg_reward, running_reward, agent.epsilon_scheduler.get_epsilon(), lr)
+        avg_loss = agent.train()
+        running_loss = avg_loss if running_loss is None else 0.95*running_loss + 0.05*avg_loss
+        running_loss_ = 0.0 if running_loss is None else running_loss
+        print(f"it: {i:4d}, avg_reward: {avg_reward:.4f}, running_reward: {running_reward:.4f}, " +
+              f"running_loss: {running_loss_:.4f}, epsilon: {agent.epsilon_scheduler.get_epsilon():.4f}, lr: {lr:.6f}")
 
-        agent.train()
+
 
         if (i + 1) % 100 == 0 or i >= num_episodes - 5:
             env = env_factory.create()

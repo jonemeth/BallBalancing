@@ -44,7 +44,7 @@ class Environment(ABC):
         # reward += math.sqrt(2.0) - distance
         # distance = (dx ** 2 + dy ** 2)
         distance = max(abs(dx), abs(dy))
-        reward += 2.0 - distance**2
+        reward += 2.0 - distance**2.0
 
         # if abs(observed_pos.x) > 0.8*self.config.limits.max_x or \
         #         abs(observed_pos.y) > 0.8*self.config.limits.max_y:
