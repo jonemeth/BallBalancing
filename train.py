@@ -42,7 +42,7 @@ def main():
     for i in range(num_episodes):
         env = env_factory.create()
 
-        episode = run_episode(env, agent, True)
+        episode = run_episode(env, agent, True, 0.0001)
         avg_reward = sum([observation.reward for observation in episode]) / len(episode)
 
         running_reward = avg_reward if running_reward is None else 0.95*running_reward + 0.05*avg_reward
