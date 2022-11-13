@@ -2,7 +2,7 @@ MODULES:
   - "bblib.environments.VirtualEnvironment"
 
 save_folder_prefix: "virtual"
-num_episodes: 400
+num_episodes: 800
 
 env_config:
   IMPORT: 'exps/default/env_config.yaml'

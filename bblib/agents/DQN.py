@@ -60,7 +60,7 @@ class DQN(Agent):
         super().__init__(action_counts)
         self.env_config = env_config
 
-        self.network = DefaultNetwork(8, [200, 200], self.action_counts, torch.nn.GELU)
+        self.network = DefaultNetwork(8, [200, 200], self.action_counts, torch.nn.LeakyReLU)
         self.epsilon_scheduler = epsilon_scheduler
 
         self.max_num_experiences = episodes_in_memory*env_config.get_episode_steps()
@@ -74,7 +74,7 @@ class DQN(Agent):
         self.num_train_iters = 128
         self.discount_factor = 0.95
 
-        self.solver = torch.optim.AdamW(self.network.parameters(), lr=0.001, betas=(0.9, 0.999), weight_decay=0.001)
+        self.solver = torch.optim.AdamW(self.network.parameters(), lr=0.0001, betas=(0.9, 0.999), weight_decay=0.001)
         self.lr_scheduler = lr_scheduler_factory.create(self.solver)
 
         self.is_train = False
