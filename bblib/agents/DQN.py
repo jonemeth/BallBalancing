@@ -60,7 +60,7 @@ class DQN(Agent):
         super().__init__(action_counts)
         self.env_config = env_config
 
-        self.network = DefaultNetwork(8, [256, 128], self.action_counts, torch.nn.LeakyReLU)
+        self.network = DefaultNetwork(8, [128, 128], self.action_counts, torch.nn.LeakyReLU)
         self.epsilon_scheduler = epsilon_scheduler
 
         self.max_num_experiences = episodes_in_memory*env_config.get_episode_steps()
