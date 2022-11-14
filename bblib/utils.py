@@ -1,3 +1,4 @@
+import math
 import random
 from typing import Tuple, Optional
 
@@ -9,11 +10,18 @@ from bblib.defs import EnvironmentConfig, EnvironmentState, Angle, Rotation, Vir
 
 
 def compute_angle(config: EnvironmentConfig, state: EnvironmentState) -> Angle:
-    return Angle(
-        (float(state.rot.x) / config.max_rotation.x) * config.max_angle.x,
-        (float(state.rot.y) / config.max_rotation.y) * config.max_angle.y
-    )
-
+    # return Angle(
+    #     (float(state.rot.x) / config.max_rotation.x) * config.max_angle.x,
+    #     (float(state.rot.y) / config.max_rotation.y) * config.max_angle.y
+    # )
+    g = 1.2
+    base_x = config.max_angle.x / (g**config.max_rotation.x)
+    base_y = config.max_angle.y / (g**config.max_rotation.y)
+    angle_x = base_x * (g**abs(state.rot.x))
+    angle_y = base_y * (g**abs(state.rot.y))
+    angle_x = -angle_x if state.rot.x < 0 else angle_x
+    angle_y = -angle_y if state.rot.y < 0 else angle_y
+    return Angle(angle_x, angle_y)
 
 def random_environment_state() -> EnvironmentState:
     rot = Rotation(random.randint(0, 9) - 4, random.randint(0, 9) - 4)
@@ -36,13 +44,13 @@ def random_virtual_environment_config(config: EnvironmentConfig, virtual_config:
 
 
 def random_virtual_ball(config: EnvironmentConfig) -> VirtualBall:
-    # direction = random.random() * 2 * 3.141592653
-    # ball_x = 10000.0 * math.cos(direction)
-    # ball_y = 10000.0 * math.sin(direction)
-    # ball_x = max(-config.limits.max_x, min(config.limits.max_x, ball_x))
-    # ball_y = max(-config.limits.max_y, min(config.limits.max_y, ball_y))
-    ball_x = random.uniform(-config.limits.max_x, config.limits.max_x)
-    ball_y = random.uniform(-config.limits.max_y, config.limits.max_y)
+    direction = random.random() * 2 * 3.141592653
+    ball_x = 10000.0 * math.cos(direction)
+    ball_y = 10000.0 * math.sin(direction)
+    ball_x = max(-config.limits.max_x, min(config.limits.max_x, ball_x))
+    ball_y = max(-config.limits.max_y, min(config.limits.max_y, ball_y))
+    # ball_x = random.uniform(-config.limits.max_x, config.limits.max_x)
+    # ball_y = random.uniform(-config.limits.max_y, config.limits.max_y)
 
     speed_x = 0.0
     speed_y = 0.0
