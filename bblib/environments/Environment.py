@@ -33,20 +33,20 @@ class Environment(ABC):
         action = self.actions[-1] if 1 <= len(self.actions) else None
 
         return Observation(estimated_pos, estimated_speed, angle, action, observed_pos,
-                           real_pos, self._compute_reward(observed_pos, estimated_speed), False)
+                           real_pos, self._compute_reward(estimated_pos, estimated_speed), False)
 
-    def _compute_reward(self, observed_pos: Position, estimated_speed: Speed) -> Reward:
+    def _compute_reward(self, estimated_position: Position, estimated_speed: Speed) -> Reward:
         reward = 0.0
 
-        dx = observed_pos.x / self.config.limits.max_x
-        dy = observed_pos.y / self.config.limits.max_y
+        dx = estimated_position.x / self.config.limits.max_x
+        dy = estimated_position.y / self.config.limits.max_y
         # distance = math.sqrt(dx ** 2 + dy ** 2)
         # reward += math.sqrt(2.0) - distance
         # distance = (dx ** 2 + dy ** 2)
         distance = max(abs(dx), abs(dy))
         reward += 2.0 - distance**2.0
-        if abs(observed_pos.x) > 0.5 * self.config.limits.max_x or \
-                abs(observed_pos.y) > 0.5 * self.config.limits.max_y:
+        if abs(estimated_position.x) > 0.5 * self.config.limits.max_x or \
+                abs(estimated_position.y) > 0.5 * self.config.limits.max_y:
             reward -= 2.0  # 4.0* math.sqrt(2.0)
 
         # OLD REWARD:
