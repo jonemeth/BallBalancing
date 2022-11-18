@@ -15,7 +15,7 @@ action_counts: [5, 5] #[5, 5]
 epsilon_scheduler:
   CLASS: 'ExponentialEpsilonScheduler'
   start_eps: 1.0
-  power: 0.997  # iters: 800
+  power: 0.99713  # iters: 800
   #power: 0.9988  # iters: 2000
 
 episodes_in_memory: 50
