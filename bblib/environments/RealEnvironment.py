@@ -17,7 +17,7 @@ class RealEnvironment(Environment):
         self.ser = serial.Serial('/dev/ttyACM0', 9600)
         self.kit = ServoKit(channels=16)
 
-        self.center = Angle(79.0, 85.0)
+        self.center = Angle(78.5, 85.0)
         self.set_servo()
         self.observe_position()
         time.sleep(1.0)

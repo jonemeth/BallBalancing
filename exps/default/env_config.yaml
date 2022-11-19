@@ -3,7 +3,7 @@ MODULES:
 
 CLASS: 'EnvironmentConfig'
 d_t: 0.05
-episode_secs: 15.0
+episode_secs: 6.0
 limits:
   CLASS: 'Limits'
   max_x: 0.075

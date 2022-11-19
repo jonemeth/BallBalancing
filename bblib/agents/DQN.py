@@ -35,7 +35,7 @@ class ExperienceDataset(Dataset):
     def add_experiences(self, experiences: List[tuple]):
         self.experiences.extend(experiences)
         if len(self.experiences) > self.max_size:
-            random.shuffle(self.experiences)
+            #random.shuffle(self.experiences)
             self.experiences = self.experiences[-self.max_size:]
 
     def __getitem__(self, idx):
@@ -60,7 +60,7 @@ class DQN(Agent):
         super().__init__(action_counts)
         self.env_config = env_config
 
-        self.network = DefaultNetwork(8, [160, 160], self.action_counts, torch.nn.GELU)
+        self.network = DefaultNetwork(8, [160, 160], self.action_counts, torch.nn.LeakyReLU)
         self.epsilon_scheduler = epsilon_scheduler
 
         self.max_num_experiences = episodes_in_memory*env_config.get_episode_steps()
@@ -71,10 +71,10 @@ class DQN(Agent):
         self.last_action = None
 
         self.batch_size = 64
-        self.num_train_iters = 128
+        self.num_train_iters = 64
         self.discount_factor = 0.95
 
-        self.solver = torch.optim.Adam(self.network.parameters(), lr=0.0002, betas=(0.9, 0.999), weight_decay=0.001)
+        self.solver = torch.optim.Adam(self.network.parameters(), lr=0.0002, betas=(0.9, 0.999), weight_decay=0.0005)
         self.lr_scheduler = lr_scheduler_factory.create(self.solver)
 
         self.is_train = False
