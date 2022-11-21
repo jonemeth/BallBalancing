@@ -9,12 +9,16 @@ from bblib.defs import EnvironmentConfig, Position, Angle, EnvironmentState, Obs
 from bblib.environments.Environment import Environment, EnvironmentFactory
 from bblib.utils import compute_angle, random_environment_state
 
+from bblib.sensor import Sensor
+
+
+sensor = Sensor()
 
 class RealEnvironment(Environment):
     def __init__(self, config: EnvironmentConfig, init_env_state: EnvironmentState):
         super().__init__(config, init_env_state)
 
-        self.ser = serial.Serial('/dev/ttyACM0', 9600)
+        #self.ser = serial.Serial('/dev/ttyACM0', 9600)
         self.kit = ServoKit(channels=16)
 
         self.center = Angle(78.5, 85.0)
@@ -22,6 +26,7 @@ class RealEnvironment(Environment):
         self.observe_position()
         time.sleep(1.0)
         self.last_time = time.time()
+        self.sensor = sensor
 
     def set_servo(self):
         angle = self.observe_angle()
@@ -32,10 +37,11 @@ class RealEnvironment(Environment):
         self.kit.servo[1].angle = x
 
     def observe_position(self) -> Position:
-        self.ser.reset_input_buffer()
+        #self.ser.reset_input_buffer()
         while True:
-            self.ser.readline()
-            read_serial = self.ser.readline().decode("utf-8").strip()
+            #self.ser.readline()
+            #read_serial = self.ser.readline().decode("utf-8").strip()
+            read_serial = "0 , 0"
             tokens = read_serial.split(' , ')
             if 2 != len(tokens):
                 continue

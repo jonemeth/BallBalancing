@@ -17,6 +17,7 @@ class Environment(ABC):
         self.kalman: Optional[KalmanFilter] = None
 
     def observe(self) -> Observation:
+        """
         observed_pos = self.observe_position()
 
         if not self.kalman:
@@ -27,6 +28,12 @@ class Environment(ABC):
 
         estimated_pos = Position(float(self.kalman.x[0]), float(self.kalman.x[1]))
         estimated_speed = Speed(float(self.kalman.x[2]), float(self.kalman.x[3]))
+        """
+        a, b, x, y, sx, sy = self.sensor.get()
+        observed_pos = Position(float(a), float(b))
+        estimated_pos = Position(float(x), float(y))
+        estimated_speed = Speed(float(sx), float(sy))
+        
         real_pos = self.observe_real_position()
 
         angle = self.observe_angle()
@@ -43,12 +50,18 @@ class Environment(ABC):
         # distance = math.sqrt(dx ** 2 + dy ** 2)
         # reward += math.sqrt(2.0) - distance
         # distance = (dx ** 2 + dy ** 2)
-        distance = max(abs(dx), abs(dy))
-        reward += 2.0 - distance**2.0
-        if abs(estimated_position.x) > 0.5 * self.config.limits.max_x or \
-                abs(estimated_position.y) > 0.5 * self.config.limits.max_y:
-            reward -= 2.0  # 4.0* math.sqrt(2.0)
 
+        if abs(dx) > 0.5 or abs(dy) > 0.5:
+            reward -= 10.0  # 4.0* math.sqrt(2.0)
+        else:
+            sx = estimated_speed.x / self.config.limits.max_x
+            sy = estimated_speed.y / self.config.limits.max_y
+            speed = math.sqrt(sx**2 + sy**2)
+            reward = 1.0 - 10.0*speed
+            
+            #distance = max(abs(dx), abs(dy))
+            #reward += 1.0 - distance**2.0
+        
         # OLD REWARD:
         # if abs(observed_pos.x) > 0.5*self.config.limits.max_x or \
         #         abs(observed_pos.y) > 0.5*self.config.limits.max_y:
@@ -82,7 +95,10 @@ class Environment(ABC):
 
         x = (observation.estimated_pos.x + self.config.limits.max_x) / (2.0 * self.config.limits.max_x)
         y = (observation.estimated_pos.y + self.config.limits.max_y) / (2.0 * self.config.limits.max_y)
-        draw_spot(img, x, y, (255, 255, 255))
+        if observation.reward == -10.0:
+            draw_spot(img, x, y, (0, 0, 255))
+        else:
+            draw_spot(img, x, y, (255, 255, 255))
         
 
         x = 0.5 + math.sin(observation.angle.x) / (2.0*angle_scale)
