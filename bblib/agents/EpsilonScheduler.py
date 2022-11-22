@@ -28,8 +28,9 @@ class LinearEpsilonScheduler(EpsilonScheduler):
 
 
 class ExponentialEpsilonScheduler(EpsilonScheduler):
-    def __init__(self, start_eps: float, power: float):
+    def __init__(self, start_eps: float, min_eps: float, power: float):
         self.start_eps = start_eps
+        self.min_eps = min_eps
         self.power = power
         self.start_eps = start_eps
         self.step_count = 0
@@ -38,4 +39,4 @@ class ExponentialEpsilonScheduler(EpsilonScheduler):
         self.step_count += 1
 
     def get_epsilon(self) -> float:
-        return self.start_eps * (self.power ** self.step_count)
+        return max(self.min_eps, self.start_eps * (self.power ** self.step_count))
