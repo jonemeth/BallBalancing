@@ -10,18 +10,20 @@ from bblib.defs import EnvironmentConfig, EnvironmentState, Angle, Rotation, Vir
 
 
 def compute_angle(config: EnvironmentConfig, state: EnvironmentState) -> Angle:
-    # return Angle(
-    #     (float(state.rot.x) / config.max_rotation.x) * config.max_angle.x,
-    #     (float(state.rot.y) / config.max_rotation.y) * config.max_angle.y
-    # )
-    g = 1.2
-    base_x = config.max_angle.x / (g**config.max_rotation.x)
-    base_y = config.max_angle.y / (g**config.max_rotation.y)
-    angle_x = base_x * (g**abs(state.rot.x))
-    angle_y = base_y * (g**abs(state.rot.y))
-    angle_x = -angle_x if state.rot.x < 0 else angle_x
-    angle_y = -angle_y if state.rot.y < 0 else angle_y
-    return Angle(angle_x, angle_y)
+    return Angle(
+        (float(state.rot.x) / config.max_rotation.x) * config.max_angle.x,
+        (float(state.rot.y) / config.max_rotation.y) * config.max_angle.y
+    )
+
+    # g = 1.2
+    # base_x = config.max_angle.x / (g**config.max_rotation.x)
+    # base_y = config.max_angle.y / (g**config.max_rotation.y)
+    # angle_x = base_x * (g**abs(state.rot.x))
+    # angle_y = base_y * (g**abs(state.rot.y))
+    # angle_x = -angle_x if state.rot.x < 0 else angle_x
+    # angle_y = -angle_y if state.rot.y < 0 else angle_y
+    # return Angle(angle_x, angle_y)
+
 
 def random_environment_state() -> EnvironmentState:
     rot = Rotation(random.randint(0, 9) - 4, random.randint(0, 9) - 4)
