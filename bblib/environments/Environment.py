@@ -57,7 +57,7 @@ class Environment(ABC):
             sx = estimated_speed.x / self.config.limits.max_x
             sy = estimated_speed.y / self.config.limits.max_y
             speed = math.sqrt(sx**2 + sy**2)
-            reward = 1.0 - 10.0*speed
+            reward = 1.0 - 2.0*speed
             
             #distance = max(abs(dx), abs(dy))
             #reward += 1.0 - distance**2.0
