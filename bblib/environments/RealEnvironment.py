@@ -2,10 +2,9 @@ import time
 from typing import Optional
 
 import numpy as np
-import serial
 from adafruit_servokit import ServoKit
 
-from bblib.defs import EnvironmentConfig, Position, Angle, EnvironmentState, Observation, Action
+from bblib.defs import EnvironmentConfig, Position, Angle, EnvironmentState, Observation, Action, Speed
 from bblib.environments.Environment import Environment, EnvironmentFactory
 from bblib.utils import compute_angle, random_environment_state
 
@@ -14,19 +13,32 @@ from bblib.sensor import Sensor
 
 sensor = Sensor()
 
+
 class RealEnvironment(Environment):
     def __init__(self, config: EnvironmentConfig, init_env_state: EnvironmentState):
         super().__init__(config, init_env_state)
 
-        #self.ser = serial.Serial('/dev/ttyACM0', 9600)
         self.kit = ServoKit(channels=16)
 
         self.center = Angle(78.5, 85.0)
         self.set_servo()
-        self.observe_position()
         time.sleep(1.0)
         self.last_time = time.time()
         self.sensor = sensor
+
+    def observe(self) -> Observation:
+        a, b, x, y, sx, sy = self.sensor.get()
+        observed_pos = Position(float(a), float(b))
+        estimated_pos = Position(float(x), float(y))
+        estimated_speed = Speed(float(sx), float(sy))
+
+        real_pos = self.observe_real_position()
+
+        angle = self.observe_angle()
+        action = self.actions[-1] if 1 <= len(self.actions) else None
+
+        return Observation(estimated_pos, estimated_speed, angle, action, observed_pos,
+                           real_pos, self._compute_reward(estimated_pos, estimated_speed), False)
 
     def set_servo(self):
         angle = self.observe_angle()
@@ -37,19 +49,8 @@ class RealEnvironment(Environment):
         self.kit.servo[1].angle = x
 
     def observe_position(self) -> Position:
-        #self.ser.reset_input_buffer()
-        while True:
-            #self.ser.readline()
-            #read_serial = self.ser.readline().decode("utf-8").strip()
-            read_serial = "0 , 0"
-            tokens = read_serial.split(' , ')
-            if 2 != len(tokens):
-                continue
-            try:
-                x, y = [int(v) for v in tokens]
-                return Position(x / 1000, y / 1000)
-            except ValueError:
-                pass
+        a, b, _, _, _, _ = self.sensor.get()
+        return Position(a, b)
 
     def observe_real_position(self) -> Optional[Position]:
         return None

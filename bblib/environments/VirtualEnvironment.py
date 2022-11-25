@@ -7,7 +7,7 @@ from bblib.defs import EnvironmentConfig, Position, Angle, EnvironmentState, Vir
     Observation, VirtualEnvironmentConfig, VirtualEnvironmentNoiseConfig, Action, RandomVirtualEnvironmentConfig
 from bblib.environments.Environment import Environment, EnvironmentFactory
 from bblib.utils import compute_angle, random_environment_state, \
-    random_virtual_environment_config, random_virtual_ball, draw_spot
+    random_virtual_environment_config, random_virtual_ball, draw_spot, init_motion_kalman
 
 
 class VirtualEnvironment(Environment):
@@ -21,6 +21,26 @@ class VirtualEnvironment(Environment):
         self.virtual_config = virtual_config
         self.ball = ball
         self.noise_cfg = noise_cfg
+
+    def observe(self) -> Observation:
+        observed_pos = self.observe_position()
+
+        if not self.kalman:
+            self.kalman = init_motion_kalman(observed_pos, self.config.d_t)
+        else:
+            self.kalman.predict()
+            self.kalman.update([observed_pos.x, observed_pos.y])
+
+        estimated_pos = Position(float(self.kalman.x[0]), float(self.kalman.x[1]))
+        estimated_speed = Speed(float(self.kalman.x[2]), float(self.kalman.x[3]))
+
+        real_pos = self.observe_real_position()
+
+        angle = self.observe_angle()
+        action = self.actions[-1] if 1 <= len(self.actions) else None
+
+        return Observation(estimated_pos, estimated_speed, angle, action, observed_pos,
+                           real_pos, self._compute_reward(estimated_pos, estimated_speed), False)
 
     def observe_position(self) -> Position:
         noise = Position(np.random.normal(scale=self.noise_cfg.position_std),

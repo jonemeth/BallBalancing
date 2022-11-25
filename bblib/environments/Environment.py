@@ -6,7 +6,7 @@ import numpy as np
 from filterpy.kalman import KalmanFilter
 
 from bblib.defs import EnvironmentConfig, Position, Angle, EnvironmentState, Observation, Action, Reward, Speed
-from bblib.utils import draw_spot, init_motion_kalman
+from bblib.utils import draw_spot
 
 
 class Environment(ABC):
@@ -15,32 +15,6 @@ class Environment(ABC):
         self.state = init_env_state
         self.actions: List[Action] = []
         self.kalman: Optional[KalmanFilter] = None
-
-    def observe(self) -> Observation:
-        """
-        observed_pos = self.observe_position()
-
-        if not self.kalman:
-            self.kalman = init_motion_kalman(observed_pos, self.config.d_t)
-        else:
-            self.kalman.predict()
-            self.kalman.update([observed_pos.x, observed_pos.y])
-
-        estimated_pos = Position(float(self.kalman.x[0]), float(self.kalman.x[1]))
-        estimated_speed = Speed(float(self.kalman.x[2]), float(self.kalman.x[3]))
-        """
-        a, b, x, y, sx, sy = self.sensor.get()
-        observed_pos = Position(float(a), float(b))
-        estimated_pos = Position(float(x), float(y))
-        estimated_speed = Speed(float(sx), float(sy))
-        
-        real_pos = self.observe_real_position()
-
-        angle = self.observe_angle()
-        action = self.actions[-1] if 1 <= len(self.actions) else None
-
-        return Observation(estimated_pos, estimated_speed, angle, action, observed_pos,
-                           real_pos, self._compute_reward(estimated_pos, estimated_speed), False)
 
     def _compute_reward(self, estimated_position: Position, estimated_speed: Speed) -> Reward:
         reward = 0.0
@@ -59,8 +33,8 @@ class Environment(ABC):
             speed = math.sqrt(sx**2 + sy**2)
             reward = 1.0 - 2.0*speed
             
-            #distance = max(abs(dx), abs(dy))
-            #reward += 1.0 - distance**2.0
+            # distance = max(abs(dx), abs(dy))
+            # reward += 1.0 - distance**2.0
         
         # OLD REWARD:
         # if abs(observed_pos.x) > 0.5*self.config.limits.max_x or \
@@ -99,7 +73,6 @@ class Environment(ABC):
             draw_spot(img, x, y, (0, 0, 255))
         else:
             draw_spot(img, x, y, (255, 255, 255))
-        
 
         x = 0.5 + math.sin(observation.angle.x) / (2.0*angle_scale)
         y = 0.5 + math.sin(observation.angle.y) / (2.0*angle_scale)
@@ -127,6 +100,10 @@ class Environment(ABC):
 
     def get_config(self):
         return self.config
+
+    @abstractmethod
+    def observe(self) -> Observation:
+        raise NotImplementedError
 
     @abstractmethod
     def update(self, action: Action) -> Observation:
