@@ -78,16 +78,16 @@ class VirtualEnvironment(Environment):
         # Check limits
         if self.ball.pos.x > self.config.limits.max_x:
             self.ball.pos.x = self.config.limits.max_x
-            self.ball.speed.x *= -0.5
+            self.ball.speed.x *= -0.25
         if self.ball.pos.x < -self.config.limits.max_x:
             self.ball.pos.x = -self.config.limits.max_x
-            self.ball.speed.x *= -0.5
+            self.ball.speed.x *= -0.25
         if self.ball.pos.y > self.config.limits.max_y:
             self.ball.pos.y = self.config.limits.max_y
-            self.ball.speed.y *= -0.5
+            self.ball.speed.y *= -0.25
         if self.ball.pos.y < -self.config.limits.max_y:
             self.ball.pos.y = -self.config.limits.max_y
-            self.ball.speed.y *= -0.5
+            self.ball.speed.y *= -0.25
 
         return self.observe()
 

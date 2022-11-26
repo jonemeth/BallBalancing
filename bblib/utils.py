@@ -60,7 +60,7 @@ def random_virtual_ball(config: EnvironmentConfig) -> VirtualBall:
     return VirtualBall(Position(ball_x, ball_y), Speed(speed_x, speed_y))
 
 
-def init_motion_kalman(pos: Position, d_t: float, magnitude_of_acceleration_noise=0.1):
+def init_motion_kalman(pos: Position, d_t: float, magnitude_of_acceleration_noise=0.2):
     f = KalmanFilter(dim_x=4, dim_z=2)
     f.x = np.array([pos.x, pos.y, 0.0, 0.0])  # velocity
 
