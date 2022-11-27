@@ -6,43 +6,56 @@ from pathlib import Path
 from PIL import Image
 
 from bblib.agents.Agent import Agent
-from bblib.defs import MODEL_FILENAME
 from bblib.environments.Environment import EnvironmentFactory
 from bblib.episode import run_episode
 from utils.config import load_config
 
 SAVES_ROOT = "saves"
+MODELS_FOLDER = "models"
+GIFS_FOLDER = "gifs"
 
 KEY_ENVIRONMENT_FACTORY = "environmentFactory"
 KEY_AGENT = "agent"
 KEY_NUM_EPISODES = "num_episodes"
 KEY_SAVE_FOLDER_PREFIX = "save_folder_prefix"
+KEY_TRAIN_EPISODE_SECS = "train_episode_secs"
+KEY_TEST_EPISODE_SECS = "test_episode_secs"
 
 
 def main():
     parser = argparse.ArgumentParser(description='Train')
     parser.add_argument('config_file', type=str)
+    parser.add_argument('--display', action="store_true")
     args = parser.parse_args()
 
     config = load_config(args.config_file)
 
+    num_episodes = int(config[KEY_NUM_EPISODES])
+    train_episode_secs = float(config[KEY_TRAIN_EPISODE_SECS])
+    test_episode_secs = float(config[KEY_TEST_EPISODE_SECS])
+
     env_factory: EnvironmentFactory = config.get(KEY_ENVIRONMENT_FACTORY)
     agent: Agent = config.get(KEY_AGENT)
+    agent.set_env_config(env_factory.get_env_config(), train_episode_secs)
 
     save_folder_prefix = config[KEY_SAVE_FOLDER_PREFIX]
-    num_episodes = int(config[KEY_NUM_EPISODES])
-
     save_folder_suffix = datetime.now().strftime('%y%m%d%H%M%S')
     save_folder = Path(SAVES_ROOT) / (save_folder_prefix+"_"+save_folder_suffix)
-    model_file = save_folder / MODEL_FILENAME
-    os.makedirs(save_folder, exist_ok=True)
+    save_folder.mkdir(parents=True, exist_ok=True)
+
+    models_folder = save_folder / MODELS_FOLDER
+    models_folder.mkdir(parents=True, exist_ok=True)
+
+    gifs_folder = save_folder / GIFS_FOLDER
+    gifs_folder.mkdir(parents=True, exist_ok=True)
+
 
     running_reward = None
     running_loss = None
     for i in range(num_episodes):
         env = env_factory.create()
 
-        episode = run_episode(env, agent, True, 0.0001)
+        episode = run_episode(env, agent, train_episode_secs, True, 1e-8 if args.display else -1.0)
         avg_reward = sum([observation.reward for observation in episode]) / len(episode)
 
         running_reward = avg_reward if running_reward is None else 0.95*running_reward + 0.05*avg_reward
@@ -54,21 +67,23 @@ def main():
         print(f"it: {i:4d}, avg_reward: {avg_reward:.4f}, running_reward: {running_reward:.4f}, " +
               f"running_loss: {running_loss_:.4f}, epsilon: {agent.epsilon_scheduler.get_epsilon():.4f}, lr: {lr:.6f}")
 
-
+        if (i + 1) % 100 == 0:
+            model_file = models_folder / f"model{i + 1:06d}"
+            agent.save(model_file)
 
         if (i + 1) % 100 == 0 or i >= num_episodes - 5:
             env = env_factory.create()
 
-            episode = run_episode(env, agent, False)
+            episode = run_episode(env, agent, test_episode_secs, False)
 
             frames = []
             for observation in episode:
                 frames.append(Image.fromarray(env.render(observation)))
 
-            frames[0].save(f"out{i + 1:06d}.gif", format='GIF', append_images=frames[1:],
+            gif_file = gifs_folder / f"anim{i + 1:06d}.gif"
+            frames[0].save(gif_file, format='GIF', append_images=frames[1:],
                            save_all=True, duration=env_factory.get_env_config().d_t * 1000, loop=0)
 
-    agent.save(model_file)
     print("Bye!")
 
 

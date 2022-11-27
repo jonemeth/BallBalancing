@@ -52,19 +52,20 @@ class LRFactory:
 
 
 class DQN(Agent):
-    def __init__(self, env_config: EnvironmentConfig,
+    def __init__(self,
                  action_counts: List[int],
                  epsilon_scheduler: EpsilonScheduler,
                  episodes_in_memory: int,
                  lr_scheduler_factory: LRFactory):
         super().__init__(action_counts)
-        self.env_config = env_config
 
         self.network = DefaultNetwork(8, [256, 128], self.action_counts, torch.nn.SiLU)
         self.epsilon_scheduler = epsilon_scheduler
+        self.episodes_in_memory = episodes_in_memory
 
-        self.max_num_experiences = episodes_in_memory*env_config.get_episode_steps()
-        self.experience_dataset = ExperienceDataset(self.max_num_experiences)
+        self.env_config = None
+        self.max_num_experiences = None
+        self.experience_dataset = None
         self.new_experiences = []
 
         self.last_observation = None
@@ -78,6 +79,11 @@ class DQN(Agent):
         self.lr_scheduler = lr_scheduler_factory.create(self.solver)
 
         self.is_train = False
+
+    def set_env_config(self, env_config: EnvironmentConfig, train_episode_secs: float):
+        self.env_config = env_config
+        self.max_num_experiences = self.episodes_in_memory*self.env_config.get_episode_steps(train_episode_secs)
+        self.experience_dataset = ExperienceDataset(self.max_num_experiences)
 
     def start_episode(self, is_train: bool):
         self.is_train = is_train
@@ -181,21 +187,21 @@ class DQN(Agent):
         train_dataloader = DataLoader(self.experience_dataset, batch_size=self.batch_size, shuffle=True)
 
         sum_loss = 0
-        for ix, batch in enumerate(train_dataloader):
+        count = 0
+        for batch in train_dataloader:
             self.solver.zero_grad()
 
             loss = self._loss2(batch)
-
             loss.backward()
             self.solver.step()
 
             sum_loss += loss.item()
-
-            if ix + 1 >= self.num_train_iters:
+            count += 1
+            if count >= self.num_train_iters:
                 break
 
         self.lr_scheduler.step()
-        return sum_loss / (ix+1)
+        return sum_loss / count
 
     def save(self, filename: Path):
         torch.save(self.network.state_dict(), filename)

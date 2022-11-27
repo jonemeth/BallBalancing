@@ -19,7 +19,7 @@ KEY_AGENT = "agent"
 def main():
     parser = argparse.ArgumentParser(description='Train')
     parser.add_argument('config_file', type=str)
-    parser.add_argument('save_folder', type=str)
+    parser.add_argument('model_file', type=str)
     parser.add_argument('gif_basename', type=str)
     parser.add_argument('count', type=int)
     parser.add_argument('--display_duration', type=float, default=-1.0)
@@ -29,8 +29,9 @@ def main():
 
     env_factory: EnvironmentFactory = config.get(KEY_ENVIRONMENT_FACTORY)
     agent: Agent = config.get(KEY_AGENT)
+    agent.set_env_config(env_factory.get_env_config())
 
-    model_file = Path(args.save_folder) / "model"
+    model_file = args.model_file
     agent.load(model_file)
 
     for i in range(args.count):

@@ -7,12 +7,12 @@ from bblib.defs import Episode
 from bblib.environments.Environment import Environment
 
 
-def run_episode(env: Environment, agent: Agent, is_train: bool, display_duration: float = -1.0) -> Episode:
+def run_episode(env: Environment, agent: Agent, secs: float, is_train: bool, display_duration: float = -1.0) -> Episode:
     observation = env.observe()
     episode = [observation]
 
     agent.start_episode(is_train)
-    for i in range(env.get_config().get_episode_steps()):
+    for i in range(env.get_config().get_episode_steps(secs)):
         action = agent.step(observation)
         observation = env.update(action)
         episode.append(observation)

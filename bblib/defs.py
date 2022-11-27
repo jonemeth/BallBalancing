@@ -4,7 +4,6 @@ from typing import List, Optional
 
 GRAVITY = 9.81  # mm/s^2
 Reward = float
-MODEL_FILENAME = "model"
 
 
 @dataclass
@@ -49,13 +48,12 @@ class Limits:
 @dataclass
 class EnvironmentConfig:
     d_t: float
-    episode_secs: float
     limits: Limits
     max_rotation: Rotation
     max_angle: Angle
 
-    def get_episode_steps(self):
-        return round(self.episode_secs / self.d_t)
+    def get_episode_steps(self, episode_secs: float):
+        return round(episode_secs / self.d_t)
 
 
 @dataclass

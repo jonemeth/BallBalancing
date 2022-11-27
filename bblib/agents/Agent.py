@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import List
 
-from bblib.defs import Observation, Action
+from bblib.defs import Observation, Action, EnvironmentConfig
 
 
 class Agent(ABC):
@@ -11,6 +11,10 @@ class Agent(ABC):
 
     def get_action_counts(self) -> List[int]:
         return self.action_counts
+
+    @abstractmethod
+    def set_env_config(self, env_config: EnvironmentConfig, train_episode_secs: float):
+        raise NotImplementedError
 
     @abstractmethod
     def step(self, observation: Observation) -> Action:

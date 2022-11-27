@@ -4,8 +4,6 @@ MODULES:
   - "torch.optim.lr_scheduler"
 
 CLASS: 'DQN'
-env_config:
-  IMPORT: 'exps/default/env_config.yaml'
 action_counts: [25] # [5, 5] #[5, 5]
 #epsilon_scheduler:
 #  CLASS: 'LinearEpsilonScheduler'
