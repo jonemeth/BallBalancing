@@ -2,7 +2,7 @@ MODULES:
   - "bblib.environments.VirtualEnvironment"
 
 save_folder_prefix: "virtual"
-num_episodes: 10000 #200000
+num_episodes: 200000
 
 train_episode_secs: 6.0
 test_episode_secs: 10.0
