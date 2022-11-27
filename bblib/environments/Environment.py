@@ -21,39 +21,13 @@ class Environment(ABC):
 
         dx = estimated_position.x / self.config.limits.max_x
         dy = estimated_position.y / self.config.limits.max_y
-        # distance = math.sqrt(dx ** 2 + dy ** 2)
-        # reward += math.sqrt(2.0) - distance
-        # distance = (dx ** 2 + dy ** 2)
 
-        if abs(dx) > 0.5 or abs(dy) > 0.5:
-            reward -= 10.0  # 4.0* math.sqrt(2.0)
-        else:
-            sx = estimated_speed.x / self.config.limits.max_x
-            sy = estimated_speed.y / self.config.limits.max_y
-            speed = math.sqrt(sx**2 + sy**2)
-            reward = 1.0 - 2.0*speed
-            
-            # distance = max(abs(dx), abs(dy))
-            # reward += 1.0 - distance**2.0
-        
-        # OLD REWARD:
-        # if abs(observed_pos.x) > 0.5*self.config.limits.max_x or \
-        #         abs(observed_pos.y) > 0.5*self.config.limits.max_y:
-        #     reward -= 10 #2.0  # 4.0* math.sqrt(2.0)
-        # else:
-        #     speed = math.sqrt(estimated_speed.x ** 2 + estimated_speed.y ** 2)
-        #     reward += 1.0 - 10.0 * speed
-
-        # if 2 <= len(self.actions):
-        #     action1 = self.actions[-2]
-        #     action2 = self.actions[-1]
-        #     rot_diff_dist = (action1.x - action2.x) ** 2 + (action1.y - action2.y) ** 2
-        #     reward -= rot_diff_dist / 20.0
-        #
-        # if 1 <= len(self.actions):
-        #     action = self.actions[-1]
-        #     rot_dist = action.x**2 + action.y**2
-        #     reward -= rot_dist / 20.0
+        if abs(dx) <= 0.5 and abs(dy) <= 0.5:
+            distance = dx ** 2 + dy ** 2
+            # sx = estimated_speed.x / self.config.limits.max_x
+            # sy = estimated_speed.y / self.config.limits.max_y
+            # speed = sx**2 + sy**2
+            reward = 2.0 - distance  # - speed
 
         return reward
 
