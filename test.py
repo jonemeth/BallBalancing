@@ -21,6 +21,7 @@ def main():
     parser.add_argument('config_file', type=str)
     parser.add_argument('model_file', type=str)
     parser.add_argument('gif_basename', type=str)
+    parser.add_argument('secs', type=float)
     parser.add_argument('count', type=int)
     parser.add_argument('--display_duration', type=float, default=-1.0)
     args = parser.parse_args()
@@ -29,7 +30,7 @@ def main():
 
     env_factory: EnvironmentFactory = config.get(KEY_ENVIRONMENT_FACTORY)
     agent: Agent = config.get(KEY_AGENT)
-    agent.set_env_config(env_factory.get_env_config())
+    agent.set_env_config(env_factory.get_env_config(), 0)
 
     model_file = args.model_file
     agent.load(model_file)
@@ -37,7 +38,7 @@ def main():
     for i in range(args.count):
         gif_filename = f"{args.gif_basename}_{i:04d}.gif"
         env = env_factory.create()
-        episode = run_episode(env, agent, False, display_duration=args.display_duration)
+        episode = run_episode(env, agent, args.secs, False, display_duration=args.display_duration)
 
         frames = []
         for observation in episode:
