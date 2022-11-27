@@ -2,7 +2,7 @@ MODULES:
   - "bblib.environments.VirtualEnvironment"
 
 save_folder_prefix: "virtual"
-num_episodes: 200000
+num_episodes: 10000 #200000
 
 train_episode_secs: 6.0
 test_episode_secs: 10.0
@@ -12,9 +12,9 @@ env_config:
 
 random_virtual_env_config:
   CLASS: 'RandomVirtualEnvironmentConfig'
-  max_gravity_offset: 0.0 #2.0
-  max_angle_offset: 0.0 #0.10
-  max_angle_scale: 0.0 #0.20
+  max_gravity_offset: 3.0
+  max_angle_offset: 0.20
+  max_angle_scale: 0.30
 
 virtual_env_noise_cfg:
   CLASS: 'VirtualEnvironmentNoiseConfig'
