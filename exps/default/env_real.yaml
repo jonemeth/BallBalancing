@@ -1,0 +1,18 @@
+MODULES:
+  - "bblib.defs"
+
+CLASS: 'EnvironmentConfig'
+d_t: 0.05
+episode_secs: 6.0
+limits:
+  CLASS: 'Limits'
+  max_x: 0.075
+  max_y: 0.090
+max_rotation:
+  CLASS: 'Rotation'
+  x: 20
+  y: 20
+max_angle:
+  CLASS: 'Angle'
+  x: 0.30 # 4 degrees in real environment
+  y: 0.16 # 4 degrees in real environment

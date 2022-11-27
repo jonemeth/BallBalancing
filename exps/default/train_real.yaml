@@ -6,7 +6,7 @@ save_folder_prefix: "real"
 num_episodes: 200000
 
 env_config:
-  IMPORT: 'exps/default/env_config.yaml'
+  IMPORT: 'exps/default/env_real.yaml'
 
 environmentFactory:
   CLASS: 'RealEnvironmentFactory'

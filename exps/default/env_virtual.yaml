@@ -14,5 +14,5 @@ max_rotation:
   y: 20
 max_angle:
   CLASS: 'Angle'
-  x: 0.24 #0.0872664  # 5 degrees
-  y: 0.24 #0.0872664  # 5 degrees
+  x: 0.069813 # 4 degrees
+  y: 0.069813 # 4 degrees

@@ -5,7 +5,7 @@ save_folder_prefix: "virtual"
 num_episodes: 200000
 
 env_config:
-  IMPORT: 'exps/default/env_config.yaml'
+  IMPORT: 'exps/default/env_virtual.yaml'
 
 random_virtual_env_config:
   CLASS: 'RandomVirtualEnvironmentConfig'
