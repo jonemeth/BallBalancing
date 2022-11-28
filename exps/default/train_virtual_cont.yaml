@@ -1,0 +1,35 @@
+MODULES:
+  - "bblib.environments.VirtualEnvironment"
+
+save_folder_prefix: "virtual"
+num_episodes: 200000
+
+train_episode_secs: 6.0
+test_episode_secs: 10.0
+
+env_config:
+  IMPORT: 'exps/default/env_virtual.yaml'
+
+random_virtual_env_config:
+  CLASS: 'RandomVirtualEnvironmentConfig'
+  max_gravity_offset: 3.0
+  max_angle_offset: 0.20
+  max_angle_scale: 0.30
+
+virtual_env_noise_cfg:
+  CLASS: 'VirtualEnvironmentNoiseConfig'
+  position_std: 0.005
+
+environmentFactory:
+  CLASS: 'RandomVirtualEnvironmentFactory'
+  env_config:
+    REF: "env_config"
+  random_virtual_env_config:
+    REF: "random_virtual_env_config"
+  virtual_env_noise_cfg:
+    REF: "virtual_env_noise_cfg"
+
+agent:
+  IMPORT: 'exps/default/agent_cont.yaml'
+
+

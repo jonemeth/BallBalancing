@@ -1,0 +1,22 @@
+MODULES:
+  - "bblib.environments.RealEnvironment"
+
+
+save_folder_prefix: "real"
+num_episodes: 200000
+
+train_episode_secs: 6.0
+test_episode_secs: 10.0
+
+env_config:
+  IMPORT: 'exps/default/env_real.yaml'
+
+environmentFactory:
+  CLASS: 'RealEnvironmentFactory'
+  env_config:
+    REF: "env_config"
+
+agent:
+  IMPORT: 'exps/default/agent_cont.yaml'
+
+

@@ -25,6 +25,7 @@ KEY_TEST_EPISODE_SECS = "test_episode_secs"
 def main():
     parser = argparse.ArgumentParser(description='Train')
     parser.add_argument('config_file', type=str)
+    parser.add_argument('--model', type=str, default=None)
     parser.add_argument('--display', action="store_true")
     args = parser.parse_args()
 
@@ -37,6 +38,9 @@ def main():
     env_factory: EnvironmentFactory = config.get(KEY_ENVIRONMENT_FACTORY)
     agent: Agent = config.get(KEY_AGENT)
     agent.set_env_config(env_factory.get_env_config(), train_episode_secs)
+
+    if args.model is not None:
+        agent.load(args.model)
 
     save_folder_prefix = config[KEY_SAVE_FOLDER_PREFIX]
     save_folder_suffix = datetime.now().strftime('%y%m%d%H%M%S')

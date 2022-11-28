@@ -5,8 +5,8 @@ CLASS: 'EnvironmentConfig'
 d_t: 0.05
 limits:
   CLASS: 'Limits'
-  max_x: 0.075
-  max_y: 0.090
+  max_x: 0.075  # 137mm
+  max_y: 0.090  # 187mm
 max_rotation:
   CLASS: 'Rotation'
   x: 20

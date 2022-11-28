@@ -1,0 +1,27 @@
+MODULES:
+  - "bblib.agents.DQN"
+  - "bblib.agents.EpsilonScheduler"
+  - "torch.optim.lr_scheduler"
+
+CLASS: 'DQN'
+action_counts: [25] # [5, 5] #[5, 5]
+#epsilon_scheduler:
+#  CLASS: 'LinearEpsilonScheduler'
+#  start_eps: 0.9
+#  end_eps: 0.1
+#  num_steps: 700 #350 #700
+epsilon_scheduler:
+  CLASS: 'ExponentialEpsilonScheduler'
+  start_eps: 0.3
+  min_eps: 0.1
+  #power: 0.99713  # iters: 800
+  #power: 0.99884  # iters: 2000
+  #power: 0.99942  # iters: 4000
+  power: 0.9995
+
+episodes_in_memory: 50
+
+lr_scheduler_factory:
+  CLASS: 'LRFactory'
+  scheduler: "ExponentialLR"
+  gamma: 1.0 #0.9943
