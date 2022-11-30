@@ -1,5 +1,6 @@
 import argparse
 import pickle
+import json
 from datetime import datetime
 from pathlib import Path
 
@@ -51,6 +52,9 @@ def main():
     save_folder_suffix = datetime.now().strftime('%y%m%d%H%M%S')
     save_folder = Path(SAVES_ROOT) / (SAVE_FOLDER_PREFIX+"_"+save_folder_suffix)
     save_folder.mkdir(parents=True, exist_ok=True)
+
+    with open(save_folder / 'args.txt', 'w') as f:
+        json.dump(args.__dict__, f, indent=2)
 
     for i in range(args.count):
         env = env_factory.create()
