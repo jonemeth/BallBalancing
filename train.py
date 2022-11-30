@@ -1,16 +1,15 @@
 import argparse
-import os
 from datetime import datetime
 from pathlib import Path
 
 from PIL import Image
 
 from bblib.agents.Agent import Agent
+from bblib.defs import SAVES_ROOT
 from bblib.environments.Environment import EnvironmentFactory
 from bblib.episode import run_episode
 from utils.config import load_config
 
-SAVES_ROOT = "saves"
 MODELS_FOLDER = "models"
 GIFS_FOLDER = "gifs"
 
@@ -52,7 +51,6 @@ def main():
 
     gifs_folder = save_folder / GIFS_FOLDER
     gifs_folder.mkdir(parents=True, exist_ok=True)
-
 
     running_reward = None
     running_loss = None

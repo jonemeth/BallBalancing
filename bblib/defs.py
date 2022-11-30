@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import List, Optional
 
 
+SAVES_ROOT = "saves"
 GRAVITY = 9.81  # mm/s^2
 Reward = float
 
