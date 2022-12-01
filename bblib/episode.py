@@ -1,4 +1,5 @@
 import time
+from pathlib import Path
 
 import cv2
 
@@ -25,3 +26,14 @@ def run_episode(env: Environment, agent: Agent, secs: float, is_train: bool, dis
     agent.finish_episode()
 
     return episode
+
+
+def save_episode_to_text(episode: Episode, filename: Path):
+    with open(filename, 'wt') as fp:
+        for obs in episode:
+            fp.write(f"{obs.observed_pos.x} {obs.observed_pos.y} " +
+                     f"{obs.estimated_pos.x} {obs.estimated_pos.y} " +
+                     f"{obs.estimated_speed.x} {obs.estimated_speed.y} " +
+                     f"{obs.angle.x} {obs.angle.y} " +
+                     (f"{obs.last_action.x} {obs.last_action.y} " if obs.last_action is not None else "0 0") +
+                     f"{obs.reward}\n")

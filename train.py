@@ -79,7 +79,8 @@ def main():
         running_loss = avg_loss if running_loss is None else 0.95 * running_loss + 0.05 * avg_loss
         running_loss_ = 0.0 if running_loss is None else running_loss
         logger.log(f"it: {i:4d}, avg_reward: {avg_reward:.4f}, running_reward: {running_reward:.4f}, " +
-                   f"running_loss: {running_loss_:.4f}, epsilon: {agent.epsilon_scheduler.get_epsilon():.4f}, lr: {lr:.6f}")
+                   f"running_loss: {running_loss_:.4f}, epsilon: {agent.epsilon_scheduler.get_epsilon():.4f}, "
+                   f"lr: {lr:.6f}")
 
         if (i + 1) % 100 == 0:
             model_file = models_folder / f"model{i + 1:06d}"

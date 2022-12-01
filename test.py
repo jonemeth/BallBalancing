@@ -9,7 +9,7 @@ from PIL import Image
 from bblib.agents.Agent import Agent
 from bblib.defs import SAVES_ROOT, Episode
 from bblib.environments.Environment import EnvironmentFactory
-from bblib.episode import run_episode
+from bblib.episode import run_episode, save_episode_to_text
 from utils.config import load_config
 
 
@@ -17,17 +17,6 @@ KEY_ENVIRONMENT_FACTORY = "environmentFactory"
 KEY_AGENT = "agent"
 
 SAVE_FOLDER_PREFIX = "test"
-
-
-def save_episode_to_text(episode: Episode, filename: Path):
-    with open(filename, 'wt') as fp:
-        for obs in episode:
-            fp.write(f"{obs.observed_pos.x} {obs.observed_pos.y} " +
-                     f"{obs.estimated_pos.x} {obs.estimated_pos.y} " +
-                     f"{obs.estimated_speed.x} {obs.estimated_speed.y} " +
-                     f"{obs.angle.x} {obs.angle.y} " +
-                     (f"{obs.last_action.x} {obs.last_action.y} " if obs.last_action is not None else "0 0") +
-                     f"{obs.reward}\n")
 
 
 def main():
