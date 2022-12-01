@@ -11,7 +11,7 @@ from bblib.utils import compute_angle, random_environment_state
 from bblib.sensor import Sensor
 
 
-sensor = Sensor()
+sensor = Sensor((137 / (0.075*2), 187 / (2*0.090)))
 
 
 class RealEnvironment(Environment):
