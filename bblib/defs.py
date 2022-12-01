@@ -54,7 +54,7 @@ class EnvironmentConfig:
     max_angle: Angle
 
     def get_episode_steps(self, episode_secs: float):
-        return 1 + round(episode_secs / self.d_t)
+        return round(episode_secs / self.d_t)
 
 
 @dataclass

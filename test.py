@@ -9,7 +9,7 @@ from PIL import Image
 from bblib.agents.Agent import Agent
 from bblib.defs import SAVES_ROOT, Episode
 from bblib.environments.Environment import EnvironmentFactory
-from bblib.episode import run_episode, save_episode_to_text
+from bblib.episode import run_episode, save_episode_to_text, save_episode_to_gif
 from utils.config import load_config
 
 
@@ -49,20 +49,15 @@ def main():
         env = env_factory.create()
         episode = run_episode(env, agent, args.secs, False, display_duration=args.display_duration)
 
-        episode_filename = save_folder / f"episode_{i:04d}.pickle"
+        episode_filename = save_folder / f"episode_{i:06d}.pickle"
         with open(episode_filename, 'wb') as fp:
             pickle.dump(episode, fp, protocol=pickle.HIGHEST_PROTOCOL)
 
         episode_text_filename = save_folder / f"episode_{i:04d}.txt"
         save_episode_to_text(episode, episode_text_filename)
 
-        frames = []
-        for observation in episode:
-            frames.append(Image.fromarray(env.render(observation)))
-
         gif_filename = save_folder / f"anim_{i:04d}.gif"
-        frames[0].save(gif_filename, format='GIF', append_images=frames[1:],
-                       save_all=True, duration=env_factory.get_env_config().d_t * 1000, loop=0)
+        save_episode_to_gif(episode, env, gif_filename)
 
     print("Bye!")
 

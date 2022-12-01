@@ -12,9 +12,9 @@ env_config:
 
 random_virtual_env_config:
   CLASS: 'RandomVirtualEnvironmentConfig'
-  max_gravity_offset: 3.0
-  max_angle_offset: 0.20
-  max_angle_scale: 0.30
+  max_gravity_offset: 0.0 #3.0
+  max_angle_offset: 0.0 #0.20
+  max_angle_scale: 0.0 #0.30
 
 virtual_env_noise_cfg:
   CLASS: 'VirtualEnvironmentNoiseConfig'
