@@ -73,7 +73,7 @@ class DQN(Agent):
 
         self.batch_size = 64
         self.num_train_iters = 64
-        self.discount_factor = 0.95
+        self.discount_factor = 0.9
 
         self.solver = torch.optim.Adam(self.network.parameters(), lr=0.0001, betas=(0.9, 0.999), weight_decay=0.0005)
         self.lr_scheduler = lr_scheduler_factory.create(self.solver)

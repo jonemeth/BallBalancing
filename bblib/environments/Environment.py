@@ -22,12 +22,12 @@ class Environment(ABC):
         dx = estimated_position.x / self.config.limits.max_x
         dy = estimated_position.y / self.config.limits.max_y
 
-        if True:  # abs(dx) <= 0.5 and abs(dy) <= 0.5:
+        if abs(dx) <= 0.5 and abs(dy) <= 0.5:
             distance = dx ** 2 + dy ** 2
-            # sx = estimated_speed.x / self.config.limits.max_x
-            # sy = estimated_speed.y / self.config.limits.max_y
-            # speed = sx**2 + sy**2
-            reward = 2.0 - distance  # - speed
+            sx = estimated_speed.x / self.config.limits.max_x
+            sy = estimated_speed.y / self.config.limits.max_y
+            speed = sx**2 + sy**2
+            reward = 10.0 - distance - speed
 
         return reward
 
