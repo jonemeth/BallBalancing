@@ -9,8 +9,8 @@ limits:
   max_y: 0.0935  # 187mm
 max_rotation:
   CLASS: 'Rotation'
-  x: 20
-  y: 20
+  x: 10
+  y: 10
 max_angle:
   CLASS: 'Angle'
   x: 0.30 # 4 degrees in real environment

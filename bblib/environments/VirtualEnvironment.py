@@ -1,4 +1,5 @@
 import math
+import random
 from typing import Optional
 
 import numpy as np
@@ -45,7 +46,15 @@ class VirtualEnvironment(Environment):
     def observe_position(self) -> Position:
         noise = Position(np.random.normal(scale=self.noise_cfg.position_std),
                          np.random.normal(scale=self.noise_cfg.position_std))
-        return Position(self.ball.pos.x + noise.x, self.ball.pos.y + noise.y)
+        x, y = self.ball.pos.x + noise.x, self.ball.pos.y + noise.y
+
+        # if random.random() < self.config.d_t:
+        #     x = random.uniform(-1, 1) * self.config.limits.max_x
+        #
+        # if random.random() < self.config.d_t:
+        #     y = random.uniform(-1, 1) * self.config.limits.max_y
+
+        return Position(x, y)
 
     def observe_real_position(self) -> Optional[Position]:
         return self.ball.pos
@@ -112,8 +121,9 @@ class RandomVirtualEnvironmentFactory(EnvironmentFactory):
         self.virtual_env_noise_cfg = virtual_env_noise_cfg
 
     def create(self) -> Environment:
+        env_state = random_environment_state()
         return VirtualEnvironment(self.env_config,
-                                  random_environment_state(),
+                                  env_state,
                                   random_virtual_environment_config(self.env_config, self.random_virtual_env_config),
-                                  random_virtual_ball(self.env_config),
+                                  random_virtual_ball(self.env_config, env_state),
                                   self.virtual_env_noise_cfg)

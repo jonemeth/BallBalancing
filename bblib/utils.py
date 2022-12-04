@@ -45,12 +45,22 @@ def random_virtual_environment_config(config: EnvironmentConfig, virtual_config:
     return VirtualEnvironmentConfig(gravity, angle_offset, angle_scale)
 
 
-def random_virtual_ball(config: EnvironmentConfig) -> VirtualBall:
-    direction = random.random() * 2 * 3.141592653
-    ball_x = 10000.0 * math.cos(direction)
-    ball_y = 10000.0 * math.sin(direction)
-    ball_x = max(-config.limits.max_x, min(config.limits.max_x, ball_x))
-    ball_y = max(-config.limits.max_y, min(config.limits.max_y, ball_y))
+def random_virtual_ball(config: EnvironmentConfig, env_state: EnvironmentState) -> VirtualBall:
+    if env_state.rot.x == 0:
+        ball_x = random.choice([-1, 1]) * config.limits.max_x
+    else:
+        ball_x = config.limits.max_x if env_state.rot.x >= 0 else -config.limits.max_x
+    if env_state.rot.y == 0:
+        ball_y = random.choice([-1, 1]) * config.limits.max_y
+    else:
+        ball_y = config.limits.max_y if env_state.rot.y >= 0 else -config.limits.max_y
+
+    # direction = random.random() * 2 * 3.141592653
+    # ball_x = 10000.0 * math.cos(direction)
+    # ball_y = 10000.0 * math.sin(direction)
+    # ball_x = max(-config.limits.max_x, min(config.limits.max_x, ball_x))
+    # ball_y = max(-config.limits.max_y, min(config.limits.max_y, ball_y))
+
     # ball_x = random.uniform(-config.limits.max_x, config.limits.max_x)
     # ball_y = random.uniform(-config.limits.max_y, config.limits.max_y)
 
