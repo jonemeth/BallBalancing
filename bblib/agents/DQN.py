@@ -13,6 +13,14 @@ from bblib.agents.nn import DefaultNetwork
 from bblib.defs import Observation, EnvironmentConfig, Action
 
 
+def smooth_l1_loss(input, target, beta):
+    n = torch.abs(input - target)
+    cond = n < beta
+    # pyre-fixme[58]: `**` is not supported for operand types `Tensor` and `int`.
+    loss = torch.where(cond, 0.5 * n ** 2 / beta, n - 0.5 * beta)
+    return loss
+
+
 @dataclass
 class Experience:
     observation: Observation
@@ -75,7 +83,7 @@ class DQN(Agent):
         self.num_train_iters = 64
         self.discount_factor = 0.9
 
-        self.solver = torch.optim.Adam(self.network.parameters(), lr=0.0001, betas=(0.9, 0.999), weight_decay=0.0005)
+        self.solver = torch.optim.Adam(self.network.parameters(), lr=0.0001, betas=(0.9, 0.999), weight_decay=0.0002)
         self.lr_scheduler = lr_scheduler_factory.create(self.solver)
 
         self.is_train = False
@@ -152,18 +160,18 @@ class DQN(Agent):
 
         return action
 
-    def _loss(self, batch: tuple) -> torch.Tensor:
-        observations, actions, next_observations, rewards, dones = batch
-
-        max_next_qs = [q.detach().max(dim=1)[0] for q in self.network(next_observations)]
-        target_qs = [(rewards + self.discount_factor * q * (1.0 - dones)) for q in max_next_qs]
-
-        qs = self.network(observations)
-        qs = [(q * a).sum(1) for q, a in zip(qs, actions)]
-
-        losses = [(q - target_q) ** 2 for q, target_q in zip(qs, target_qs)]
-        loss = torch.stack(losses).mean(0).mean(0)
-        return loss
+    # def _loss(self, batch: tuple) -> torch.Tensor:
+    #     observations, actions, next_observations, rewards, dones = batch
+    #
+    #     max_next_qs = [q.detach().max(dim=1)[0] for q in self.network(next_observations)]
+    #     target_qs = [(rewards + self.discount_factor * q * (1.0 - dones)) for q in max_next_qs]
+    #
+    #     qs = self.network(observations)
+    #     qs = [(q * a).sum(1) for q, a in zip(qs, actions)]
+    #
+    #     losses = [(q - target_q) ** 2 for q, target_q in zip(qs, target_qs)]
+    #     loss = torch.stack(losses).mean(0).mean(0)
+    #     return loss
 
     def _loss2(self, batch: tuple) -> torch.Tensor:
         observations, actions, next_observations, rewards, dones = batch
@@ -176,6 +184,7 @@ class DQN(Agent):
         qs = [(q * a).sum(1) for q, a in zip(qs, actions)]
 
         losses = [(q - target_q) ** 2 for q in qs]
+        # losses = [smooth_l1_loss(q, target_q, 1.0) for q in qs]
         loss = torch.stack(losses).mean(0).mean(0)
         return loss
 
