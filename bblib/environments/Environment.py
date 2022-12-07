@@ -16,18 +16,30 @@ class Environment(ABC):
         self.actions: List[Action] = []
         self.kalman: Optional[KalmanFilter] = None
 
+        self.positions = []
+
     def _compute_reward(self, estimated_position: Position, estimated_speed: Speed) -> Reward:
-        reward = 0.0
+        self.positions.append(estimated_position)
 
-        dx = estimated_position.x / self.config.limits.max_x
-        dy = estimated_position.y / self.config.limits.max_y
+        n = 2
 
-        if abs(dx) <= 0.5 and abs(dy) <= 0.5:
-            distance = dx ** 2 + dy ** 2
-            sx = estimated_speed.x / self.config.limits.max_x
-            sy = estimated_speed.y / self.config.limits.max_y
-            speed = sx**2 + sy**2
-            reward = 10.0 - distance - speed
+        if len(self.positions) < n:
+            return 0.0
+
+        for i in range(n):
+            dx = self.positions[-1-i].x / self.config.limits.max_x
+            dy = self.positions[-1-i].y / self.config.limits.max_y
+
+            if abs(dx) > 0.5 or abs(dy) > 0.5:
+                return 0.0
+
+        dx = self.positions[-1].x / self.config.limits.max_x
+        dy = self.positions[-1].y / self.config.limits.max_y
+        distance = dx ** 2 + dy ** 2
+        sx = estimated_speed.x / self.config.limits.max_x
+        sy = estimated_speed.y / self.config.limits.max_y
+        speed = sx**2 + sy**2
+        reward = max(0.0, 10.0 - distance - speed)
 
         return reward
 

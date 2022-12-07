@@ -48,11 +48,11 @@ class VirtualEnvironment(Environment):
                          np.random.normal(scale=self.noise_cfg.position_std))
         x, y = self.ball.pos.x + noise.x, self.ball.pos.y + noise.y
 
-        if random.random() < 0.5*self.config.d_t:
-            x = random.uniform(-1, 1) * self.config.limits.max_x
-
-        if random.random() < 0.5*self.config.d_t:
-            y = random.uniform(-1, 1) * self.config.limits.max_y
+        # if random.random() < 0.5*self.config.d_t:
+        #     x = random.uniform(-1, 1) * self.config.limits.max_x
+        #
+        # if random.random() < 0.5*self.config.d_t:
+        #     y = random.uniform(-1, 1) * self.config.limits.max_y
 
         return Position(x, y)
 
