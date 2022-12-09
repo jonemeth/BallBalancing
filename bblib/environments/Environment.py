@@ -21,7 +21,7 @@ class Environment(ABC):
     def _compute_reward(self, estimated_position: Position, estimated_speed: Speed) -> Reward:
         self.positions.append(estimated_position)
 
-        n = 2
+        n = 1
 
         if len(self.positions) < n:
             return 0.0
