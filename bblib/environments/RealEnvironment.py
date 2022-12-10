@@ -20,7 +20,7 @@ class RealEnvironment(Environment):
 
         self.kit = ServoKit(channels=16)
 
-        self.center = Angle(78.5, 85.0)
+        self.center = Angle(75.0, 82.0)
         self.set_servo()
         time.sleep(1.0)
         self.last_time = time.time()
