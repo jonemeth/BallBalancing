@@ -17,7 +17,7 @@ epsilon_scheduler:
   #power: 0.99713  # iters: 800
   #power: 0.99884  # iters: 2000
   #power: 0.99942  # iters: 4000
-  power: 0.999  # 0.9995
+  power: 0.9995
 
 episodes_in_memory: 50
 
