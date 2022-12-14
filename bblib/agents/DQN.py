@@ -183,8 +183,8 @@ class DQN(Agent):
         qs = self.network(observations)
         qs = [(q * a).sum(1) for q, a in zip(qs, actions)]
 
-        # losses = [(q - target_q) ** 2 for q in qs]
-        losses = [smooth_l1_loss(q, target_q, 1.0) for q in qs]
+        losses = [(q - target_q) ** 2 for q in qs]
+        # losses = [smooth_l1_loss(q, target_q, 1.0) for q in qs]
         loss = torch.stack(losses).mean(0).mean(0)
         return loss
 
